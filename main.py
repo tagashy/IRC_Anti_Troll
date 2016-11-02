@@ -8,7 +8,6 @@ from command_class import *
 cmds=commands_init()
 
 def recv_loop(sock):
-    try:
         while (1):
             res = sock.recv(1024)
             if "PING" in res.split(" ")[0]:
@@ -21,8 +20,7 @@ def recv_loop(sock):
                     command_loop(pseudo, message, msg_type, sock,cmds)
                     if message != "NONE":
                         print "[" + msg_type + "]", "USER:", pseudo, "send:", message
-    except:
-        pass
+
 
 
 def send_loop(sock, target):
