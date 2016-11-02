@@ -4,7 +4,8 @@ import time
 import message_parsing
 from config import *
 from commands import *
-
+from command_class import *
+cmds=commands_init()
 
 def recv_loop(sock):
     try:
@@ -17,7 +18,7 @@ def recv_loop(sock):
                     create_list_of_user(res)
                 else:
                     pseudo, message, msg_type = message_parsing.parse_msg(res)
-                    command_loop(pseudo, message, msg_type, sock)
+                    command_loop(pseudo, message, msg_type, sock,cmds)
                     if message != "NONE":
                         print "[" + msg_type + "]", "USER:", pseudo, "send:", message
     except:
@@ -37,6 +38,7 @@ def send_loop(sock, target):
 
 
 def init_bot():
+
     sock = socket(AF_INET, SOCK_STREAM)
     sock.connect(("irc.root-me.org", 6667))
     thread.start_new_thread(recv_loop, (sock,))
