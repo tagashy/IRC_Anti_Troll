@@ -1,7 +1,7 @@
 import re
 from config import *
 
-name_reg = re.compile("(?<=:).*(?=!)")
+name_reg = re.compile("(?<=:)[^!]*(?=!)")
 msg_type_reg = re.compile("(?<= PRIVMSG ).*(?= :)")
 public_content_reg = re.compile("(?<= PRIVMSG " + channel + " :).*")
 private_content_reg = re.compile("(?<= PRIVMSG " + bot_name + " :).*")

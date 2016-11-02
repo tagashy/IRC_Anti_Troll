@@ -50,3 +50,5 @@ def init_bot():
     sock.send("QUIT : va faire une revision\r\n")
     time.sleep(1)
     sock.close()
+
+init_bot()
