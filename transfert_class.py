@@ -1,7 +1,7 @@
 from commands import *
 from message_parsing import *
 import threading
-
+import utils
 
 class Transferrer(threading.Thread):
     def __init__(self, addr, channel, port, bot_name, send_sock, pseudo=None,couleur=2):
@@ -24,20 +24,7 @@ class Transferrer(threading.Thread):
         return self._stop.isSet()
 
     def run(self):
-        self.recv_sock = socket(AF_INET, SOCK_STREAM)
-        self.recv_sock.connect((self.addr, self.port))
-        self.recv_sock.send("USER " + self.bot_name + " Bot Bot Bot\r\n")
-        self.recv_sock.send("NICK " + self.bot_name + "\r\n")
-        self.recv_sock.settimeout(2)
-        try:
-            while 1:
-                res = self.recv_sock.recv(1024)
-                if debug:
-                    print res
-        except:
-            self.recv_sock.settimeout(None)
-            self.recv_sock.send("JOIN " + self.channel + "\r\n")
-        self.recv_sock
+        self.recv_sock=utils.create_irc_socket(self.addr,self.bot_name,self.channel,self.port)
         pub_reg, priv_reg = init_parsing_external_channel(self.bot_name, self.channel)
         print "[!] Initialisation of tranfert done"
         self.recv_sock.settimeout(2)
