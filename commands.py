@@ -1,5 +1,12 @@
 from config import *
 from message_parsing import *
+import thread
+import random
+from socket import *
+
+num_genrator = random.Random()
+color = 2
+transferrer_list = []
 
 
 def command_loop(pseudo, message, msg_type, sock, cmds):
@@ -61,6 +68,7 @@ def DIE(pseudo, message, msg_type, sock):
 
 
 def transfert_message_from_other_place(pseudo, message, msg_type, sock):
+    global color, transferrer_list
     param = message.split()
     if len(param) == 1:
         if "?" in param[0]:
@@ -68,28 +76,82 @@ def transfert_message_from_other_place(pseudo, message, msg_type, sock):
     elif len(param) > 1:
         if "?" in param[0] or "?" in param[1]:
             send_public_message("!transfert server channel (Private/Publique)", sock)
-        else:
-            pass
-
-
-def transfert_loop(recv_sock, send_sock,channel_name,external_bot_name,pseudo=None):
-    pub_reg,priv_reg=init_parsing_external_channel(external_bot_name,channel_name)
-    while (1):
-        res = recv_sock.recv(1024)
-        if "PING" in res.split(" ")[0]:
-            recv_sock.send(res.replace("PING", "PONG"))
-        elif res.strip() != "":
-            if "353" in res:
-                create_list_of_user(res)
+        elif len(param) == 3:
+            addr = param[1]
+            server_addr = addr.split(":")
+            if len(server_addr) == 1:
+                server_addr = addr
+                port = 6667
+            elif len(server_addr) == 2:
+                port = int(server_addr[1])
+                server_addr = server_addr[0]
             else:
-                user, message, msg_type = parse_msg_external_chan(res,priv_reg,pub_reg)
-                if pseudo is not None:
-                    if msg_type=="Public_Message":
-                        send_private_message("Message from channel "+channel_name+" :"+user+">"+message,pseudo,send_sock)
-                    else:
-                        send_private_message("Message from user "+pseudo+">"+message,pseudo,send_sock)
-                else:
-                    if msg_type=="Public_Message":
-                        send_public_message("Message from channel "+channel_name+" :"+user+">"+message,send_sock)
-                    else:
-                        send_public_message("Message from user "+user+">"+message,send_sock)
+                send_public_message("too much :", sock)
+                return
+            channel = param[2]
+            external_bot_name = "user_" + str(num_genrator.randint(1000, 1000 * 1000))
+            print "[!] name of transferer user:" + external_bot_name
+            transfer = Transferrer(addr, channel, port, external_bot_name, sock, pseudo, couleur=color)
+            transfer.start()
+            color += 1
+            print "[!] Transferring data from " + addr + channel + " started"
+            transferrer_list.append(transfer)
+
+        elif len(param) == 4:
+            addr = param[1]
+            server_addr = addr.split(":")
+            if len(server_addr) == 1:
+                server_addr = addr
+                port = 6667
+            elif len(server_addr) == 2:
+                port = int(server_addr[1])
+                server_addr = server_addr[0]
+            else:
+                send_public_message("too much :", sock)
+                return
+            channel = param[2]
+            send_type = param[3]
+            external_bot_name = "user_" + str(num_genrator.randint(1000, 1000 * 1000))
+            print "[!] name of transferer user:" + external_bot_name
+            if send_type.lower() == "publique" or send_type.lower() == "public":
+                transfer = Transferrer(addr, channel, port, external_bot_name, sock, couleur=color)
+            else:
+                transfer = Transferrer(addr, channel, port, external_bot_name, sock, pseudo, couleur=color)
+            transfer.start()
+            color += 1
+            print "[!] Transferring data from " + addr + channel + " started"
+            transferrer_list.append(transfer)
+
+def suppress_transferrer(pseudo, message, msg_type, sock):
+    param = message.split()
+    if len(param) == 1:
+        if "?" in param[0]:
+            send_public_message("!kill_transfert server channel ", sock)
+    elif len(param) > 1:
+        if "?" in param[0] or "?" in param[1]:
+            send_public_message("!kill_transfert server channel ", sock)
+        elif len(param) == 3:
+            addr = param[1]
+            server_addr = addr.split(":")
+            if len(server_addr) == 1:
+                server_addr = addr
+                port = 6667
+            elif len(server_addr) == 2:
+                port = int(server_addr[1])
+                server_addr = server_addr[0]
+            else:
+                send_public_message("too much :", sock)
+                return
+            channel = param[2]
+            tr_stopped = False
+            for tr in transferrer_list:
+                if tr.port==port and tr.addr==server_addr and tr.channel==channel:
+                    tr.stop()
+                    tr_stopped=True
+                    print "[!] transferrer "+tr.channel+" stopped"
+            if not tr_stopped:
+                send_public_message("no transferrer like this one")
+
+
+
+from transfert_class import Transferrer

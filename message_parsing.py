@@ -2,7 +2,7 @@ import re
 from config import *
 
 name_reg = re.compile("(?<=:)[^!]*(?=!)")
-msg_type_reg = re.compile("(?<= PRIVMSG ).*(?= :)")
+msg_type_reg = re.compile("(?<= PRIVMSG )[^:]*(?= :)")
 pub_content_reg = re.compile("(?<= PRIVMSG " + channel + " :).*")
 priv_content_reg = re.compile("(?<= PRIVMSG " + bot_name + " :).*")
 name_list_reg = re.compile("(?<= 353 " + bot_name + " = " + channel + " :).*")
@@ -71,10 +71,13 @@ def parse_name_list(msg):
 def init_parsing_external_channel(external_bot_name, external_channel):
     public_content_reg = re.compile("(?<= PRIVMSG " + external_channel + " :).*")
     private_content_reg = re.compile("(?<= PRIVMSG " + external_bot_name + " :).*")
+    if debug:
+        print "(?<= PRIVMSG " + external_channel + " :).*"
+        print "(?<= PRIVMSG " + external_bot_name + " :).*"
     return public_content_reg, private_content_reg
 
 
-def parse_msg_external_chan(msg, private_content_reg, public_content_reg):
+def parse_msg_external_chan(msg, private_content_reg, public_content_reg,external_bot_name,external_channel):
     reg_res = name_reg.search(msg)
     msg_type_res = msg_type_reg.search(msg)
     if reg_res:
@@ -87,9 +90,9 @@ def parse_msg_external_chan(msg, private_content_reg, public_content_reg):
     # parsing Public Private
     if msg_type_res:
         target = msg_type_res.group(0)
-        if target == bot_name:
+        if target == external_bot_name:
             msg_type = "Private_Message"
-        elif target == channel:
+        elif target == external_channel:
             msg_type = "Public_Message"
         else:
             msg_type = "UNDEFINED"

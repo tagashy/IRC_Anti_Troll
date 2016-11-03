@@ -48,7 +48,6 @@ def init_bot():
     print "[!] Join " + channel + " send"
     send_loop(sock, "Tagashy")
     sock.send("QUIT : va faire une revision\r\n")
-    time.sleep(1)
     sock.close()
 
 init_bot()

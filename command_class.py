@@ -15,5 +15,7 @@ def commands_init():
     cmds.append(cmd)
     cmd = command(["!transfert"],commands.transfert_message_from_other_place,"Tranfert")
     cmds.append(cmd)
+    cmd = command(["!kill_transfert"], commands.suppress_transferrer, "Kill_Tranfert")
+    cmds.append(cmd)
     return cmds
 
