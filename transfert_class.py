@@ -24,7 +24,7 @@ class Transferrer(threading.Thread):
 
     def run(self):
         self.users,self.recv_sock=utils.create_irc_socket(self.addr,self.bot_name,self.channel,self.port)
-        pub_reg, priv_reg = init_parsing_external_channel(self.bot_name, self.channel)
+        pub_reg, priv_reg = init_parsing_channel(self.bot_name, self.channel)
         print "[!] Initialisation of tranfert done"
         self.recv_sock.settimeout(2)
         while 1:
@@ -39,8 +39,8 @@ class Transferrer(threading.Thread):
                 elif res.strip() != "":
                         if debug:
                             print res
-                        user, message, msg_type = parse_msg_external_chan(res, priv_reg, pub_reg, self.bot_name,
-                                                                          self.channel)
+                        user, message, msg_type = parse_msg(res, pub_reg, priv_reg, self.bot_name,
+                                                            self.channel)
                         if self.pseudo is not None:
                             if msg_type == "Public_Message":
                                 send_private_message(
