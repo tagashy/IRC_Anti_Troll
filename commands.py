@@ -2,24 +2,27 @@ from config import *
 from message_parsing import *
 import thread
 import random
+import rpg
 from socket import *
 
 num_genrator = random.Random()
+num_genrator.seed()
 color = 2
 transferrer_list = []
-
+rpg_list=[]
 
 def command_loop(pseudo, message, msg_type, sock, cmds):
-    message = message.replace("\n", "").replace("\r", "")
+    #message = message.replace("\n", "").replace("\r", "")
     if "!help" == message:
         ret = "command available:"
         for cmd in cmds:
-            if cmd.help:
+            if cmd.helpable:
                 if isinstance(cmd.keyword, str):
-                    ret += " " + cmd.keyword
+                        ret += " " + cmd.keyword
                 else:
                     for key in cmd.keyword:
-                        ret += " " + key
+                        if not "?" in key:
+                                ret += " " + key
         send_public_message(ret, sock)
     elif "help" in message or "aide" in message:
         send_ticket_to_ghozt(pseudo, message, msg_type, sock)
@@ -31,15 +34,12 @@ def command_loop(pseudo, message, msg_type, sock, cmds):
                 cmd.function(pseudo, message, msg_type, sock)
         else:
             for key in cmd.keyword:
-                if key in message:
+                if message.startswith(key+" ")or message == key:
                     print "[!] function " + cmd.name + " called by " + pseudo
                     cmd.function(pseudo, message, msg_type, sock)
 
 
-def create_list_of_user(message):
-    global users
-    print "[!] creation of user list"
-    users = parse_name_list(message)
+
 
 
 def send_ticket_to_ghozt(pseudo, message, msg_type, sock):
@@ -122,6 +122,7 @@ def transfert_message_from_other_place(pseudo, message, msg_type, sock):
             print "[!] Transferring data from " + addr + channel + " started"
             transferrer_list.append(transfer)
 
+
 def suppress_transferrer(pseudo, message, msg_type, sock):
     param = message.split()
     if len(param) == 1:
@@ -145,13 +146,90 @@ def suppress_transferrer(pseudo, message, msg_type, sock):
             channel = param[2]
             tr_stopped = False
             for tr in transferrer_list:
-                if tr.port==port and tr.addr==server_addr and tr.channel==channel:
+                if tr.port == port and tr.addr == server_addr and tr.channel == channel:
                     tr.stop()
-                    tr_stopped=True
-                    print "[!] transferrer "+tr.channel+" stopped"
+                    tr_stopped = True
+                    print "[!] transferrer " + tr.channel + " stopped"
             if not tr_stopped:
-                send_public_message("no transferrer like this one")
+                send_public_message("no transferrer like this one",sock)
 
 
+def start_rpg(pseudo, message, msg_type, sock):
+    param = message.split()
+    rpg_game=None
+    if len(param) == 1:
+        if "?" in param[0]:
+            send_public_message("!rpg (server) (channel) ", sock)
+        else:
+            rpg_channel = "#RPG_" + str(num_genrator.randint(1000, 1000 * 1000))
+            send_public_message("Starting RPG Game in channel : "+rpg_channel,sock)
+            rpg_game=rpg.Rpg(main_server,"RPG_MASTER",rpg_channel,main_port)
+            rpg_game.start()
+    elif len(param) == 1:
+        if "?" in param[0] or "?" in param[1]:
+            send_public_message("!rpg server (channel) ", sock)
+        else:
+            addr = param[1]
+            server_addr = addr.split(":")
+            if len(server_addr) == 1:
+                server_addr = addr
+                port = 6667
+            elif len(server_addr) == 2:
+                port = int(server_addr[1])
+                server_addr = server_addr[0]
+            else:
+                send_public_message("too much :", sock)
+                return
+            rpg_channel = "#RPG_" + str(num_genrator.randint(1000, 1000 * 1000))
+            rpg_game = rpg.Rpg(server_addr, "RPG_MASTER", rpg_channel, port)
+            rpg_game.start()
+            send_public_message("Starting RPG Game on server"+addr+" in channel : " + rpg_channel,sock)
+    else:
+        addr = param[1]
+        server_addr = addr.split(":")
+        if len(server_addr) == 1:
+            server_addr = addr
+            port = 6667
+        elif len(server_addr) == 2:
+            port = int(server_addr[1])
+            server_addr = server_addr[0]
+        else:
+            send_public_message("too much :", sock)
+            return
+        rpg_game = rpg.Rpg(server_addr, "RPG_MASTER", param[2], port)
+        rpg_game.start()
+        send_public_message("Starting RPG Game on server" + addr + " in channel : " + param[2],sock)
+    if rpg_game is not None:
+        rpg_list.append(rpg_game)
+
+def stop_rpg(pseudo, message, msg_type, sock):
+    param = message.split()
+    if len(param) == 1:
+        if "?" in param[0]:
+            send_public_message("!kill_rpg server channel ", sock)
+    elif len(param) > 1:
+        if "?" in param[0] or "?" in param[1]:
+            send_public_message("!kill_rpg server channel ", sock)
+        elif len(param) == 3:
+            addr = param[1]
+            server_addr = addr.split(":")
+            if len(server_addr) == 1:
+                server_addr = addr
+                port = 6667
+            elif len(server_addr) == 2:
+                port = int(server_addr[1])
+                server_addr = server_addr[0]
+            else:
+                send_public_message("too much :", sock)
+                return
+            channel = param[2]
+            tr_stopped = False
+            for rpg_game in rpg_list:
+                if rpg_game.port == port and rpg_game.addr == server_addr and rpg_game.channel == channel:
+                    rpg_game.stop()
+                    tr_stopped = True
+                    print "[!] RPG " + rpg_game.channel + " stopped"
+            if not tr_stopped:
+                send_public_message("no RPG like this one",sock)
 
 from transfert_class import Transferrer

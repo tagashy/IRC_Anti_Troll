@@ -56,7 +56,7 @@ def parse_msg(msg):
         msg_content = "NONE"
         if debug:
             print "[W] ERROR IN MSG TYPE"
-
+    msg_content=msg_content.replace("\r","").replace("\n","")
     return name, msg_content, msg_type
 
 
@@ -107,5 +107,5 @@ def parse_msg_external_chan(msg, private_content_reg, public_content_reg,externa
         msg_content = "NONE"
         if debug:
             print "[W] ERROR IN MSG TYPE"
-
+    msg_content=msg_content.replace("\r","").replace("\n","")
     return name, msg_content, msg_type

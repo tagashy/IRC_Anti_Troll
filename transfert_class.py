@@ -2,7 +2,6 @@ from commands import *
 from message_parsing import *
 import threading
 import utils
-
 class Transferrer(threading.Thread):
     def __init__(self, addr, channel, port, bot_name, send_sock, pseudo=None,couleur=2):
         threading.Thread.__init__(self)
@@ -15,7 +14,7 @@ class Transferrer(threading.Thread):
         self.send_sock=send_sock
         self.recv_sock = None
         self.couleur=couleur
-
+        self.users=None
     def stop(self):
         self._stop.set()
 
@@ -24,7 +23,7 @@ class Transferrer(threading.Thread):
         return self._stop.isSet()
 
     def run(self):
-        self.recv_sock=utils.create_irc_socket(self.addr,self.bot_name,self.channel,self.port)
+        self.users,self.recv_sock=utils.create_irc_socket(self.addr,self.bot_name,self.channel,self.port)
         pub_reg, priv_reg = init_parsing_external_channel(self.bot_name, self.channel)
         print "[!] Initialisation of tranfert done"
         self.recv_sock.settimeout(2)
@@ -38,9 +37,6 @@ class Transferrer(threading.Thread):
                 if "PING" in res.split(" ")[0]:
                     self.recv_sock.send(res.replace("PING", "PONG"))
                 elif res.strip() != "":
-                    if "353" in res:
-                        create_list_of_user(res)
-                    else:
                         if debug:
                             print res
                         user, message, msg_type = parse_msg_external_chan(res, priv_reg, pub_reg, self.bot_name,

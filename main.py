@@ -5,6 +5,7 @@ import message_parsing
 from config import *
 from commands import *
 from command_class import *
+import utils
 cmds=commands_init()
 
 def recv_loop(sock):
@@ -13,9 +14,6 @@ def recv_loop(sock):
             if "PING" in res.split(" ")[0]:
                 sock.send(res.replace("PING", "PONG"))
             elif res.strip() != "":
-                if "353" in res:
-                    create_list_of_user(res)
-                else:
                     pseudo, message, msg_type = message_parsing.parse_msg(res)
                     command_loop(pseudo, message, msg_type, sock,cmds)
                     if message != "NONE":
@@ -36,16 +34,8 @@ def send_loop(sock, target):
 
 
 def init_bot():
-
-    sock = socket(AF_INET, SOCK_STREAM)
-    sock.connect(("irc.root-me.org", 6667))
+    users,sock=utils.create_irc_socket(main_server,bot_name,channel,main_port)
     thread.start_new_thread(recv_loop, (sock,))
-    sock.send("USER " + bot_name + " Bot Bot Bot\r\n")
-    sock.send("NICK " + bot_name + "\r\n")
-    print "[!] Authentification send"
-    time.sleep(2)
-    sock.send("JOIN " + channel + "\r\n")
-    print "[!] Join " + channel + " send"
     send_loop(sock, "Tagashy")
     sock.send("QUIT : va faire une revision\r\n")
     sock.close()
