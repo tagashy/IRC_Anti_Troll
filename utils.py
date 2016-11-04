@@ -15,6 +15,9 @@ def create_irc_socket(addr, bot_name, channel, port=6667):
     try:
         while 1:
             res = recv_sock.recv(1024)
+            if "[Throttled]" in res or "[Registration timeout]" in res or "ERROR :Closing link:" in res:
+                print "[W] Unable to refister"
+                exit(0)
             if "353" in res:
                 print "[!] creation of user list"
                 users = parse_name_list(res,name_list_reg)

@@ -11,37 +11,6 @@ color = 2
 transferrer_list = []
 rpg_list=[]
 
-def command_loop(pseudo, message, msg_type, sock, cmds):
-    #message = message.replace("\n", "").replace("\r", "")
-    if "!help" == message:
-        ret = "command available:"
-        for cmd in cmds:
-            if cmd.helpable:
-                if isinstance(cmd.keyword, str):
-                        ret += " " + cmd.keyword
-                else:
-                    for key in cmd.keyword:
-                        if not "?" in key:
-                                ret += " " + key
-        send_public_message(ret, sock)
-    elif "help" in message or "aide" in message:
-        send_ticket_to_ghozt(pseudo, message, msg_type, sock)
-
-    for cmd in cmds:
-        if isinstance(cmd.keyword, str):
-            if message == cmd.keyword:
-                print "[!] function " + cmd.name + " called by " + pseudo
-                cmd.function(pseudo, message, msg_type, sock)
-        else:
-            for key in cmd.keyword:
-                if message.startswith(key+" ")or message == key:
-                    print "[!] function " + cmd.name + " called by " + pseudo
-                    cmd.function(pseudo, message, msg_type, sock)
-
-
-
-
-
 def send_ticket_to_ghozt(pseudo, message, msg_type, sock):
     if msg_type == "Public_Message":
         send_public_message("\x01ACTION pointe ghozt\x01", sock)
@@ -196,7 +165,7 @@ def start_rpg(pseudo, message, msg_type, sock):
         else:
             send_public_message("too much :", sock)
             return
-        rpg_game = rpg.Rpg(server_addr, "RPG_MASTER", param[2], port)
+        rpg_game = rpg.Rpg(server_addr, "RPG_MASTER"+str(num_genrator.randint(0,1000*1000)), param[2], port)
         rpg_game.start()
         send_public_message("Starting RPG Game on server" + addr + " in channel : " + param[2],sock)
     if rpg_game is not None:

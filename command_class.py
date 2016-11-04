@@ -1,8 +1,8 @@
 import commands
 from config import *
+from commands import send_ticket_to_ghozt
 
-
-class command:
+class Command:
     def __init__(self, keyword, function, name, helpable=True):
         self.keyword = keyword
         self.function = function
@@ -12,15 +12,15 @@ class command:
 
 def commands_init():
     cmds = []
-    cmd = command("!die " + bot_name, commands.DIE, "DIE")
+    cmd = Command("!die " + bot_name, commands.DIE, "DIE")
     cmds.append(cmd)
-    cmd = command(["!transfert", "!transfert?"], commands.transfert_message_from_other_place, "Tranfert")
+    cmd = Command(["!transfert", "!transfert?"], commands.transfert_message_from_other_place, "Tranfert")
     cmds.append(cmd)
-    cmd = command(["!kill_transfert", "!kill_transfert?"], commands.suppress_transferrer, "Kill_Tranfert")
+    cmd = Command(["!kill_transfert", "!kill_transfert?"], commands.suppress_transferrer, "Kill_Tranfert")
     cmds.append(cmd)
-    cmd = command(["!rpg", "!rpg?"], commands.start_rpg, "Rpg")
+    cmd = Command(["!rpg", "!rpg?"], commands.start_rpg, "Rpg")
     cmds.append(cmd)
-    cmd = command(["!kill_rpg", "!kill_rpg?"], commands.start_rpg, "Kill_Rpg")
+    cmd = Command(["!kill_rpg", "!kill_rpg?"], commands.stop_rpg, "Kill_Rpg")
     cmds.append(cmd)
     return cmds
 
@@ -43,7 +43,7 @@ def command_loop(pseudo, message, msg_type, sock, cmds):
 
 
 def help_cmd(cmds, sock):
-    ret = "command available:"
+    ret = "Command available:"
     for cmd in cmds:
         if cmd.help:
             if isinstance(cmd.keyword, str):

@@ -4,7 +4,7 @@ from config import *
 import utils
 from message_parsing import *
 import random
-from command_class import command
+from command_class import Command
 
 num_genrator = random.Random()
 num_genrator.seed()
@@ -91,18 +91,22 @@ class Rpg(threading.Thread):
 
             except:
                 pass
-    def command_choice(self,message,user):
+
+    def command_choice(self, message, user):
         param = message.split(" ")
         for cmd in self.cmds:
             if isinstance(cmd.keyword, str):
                 if message == cmd.keyword:
-                    print "[!] function " + cmd.name + " called by " + pseudo
-                    cmd.function(param, user,)
+                    if debug:
+                        print "[!] function " + cmd.name + " called by " + user
+                    cmd.function(param, user)
             else:
                 for key in cmd.keyword:
                     if message.startswith(key + " ") or message == key:
-                        print "[!] function " + cmd.name + " called by " + pseudo
-                        cmd.function(pseudo, message, msg_type, sock)
+                        if debug:
+                            print "[!] function " + cmd.name + " called by " + user
+                        cmd.function(param, user)
+
     def fireball(self, param, user):
         if len(param) == 1:
             self.send_public_message(
@@ -148,7 +152,6 @@ class Rpg(threading.Thread):
 
     def heal(self, param, user, cost_reduction, magic_upgrade):
 
-
         if len(param) <= 1:
             if "?" in param[0]:
                 self.send_public_message(
@@ -183,7 +186,7 @@ class Rpg(threading.Thread):
                     break
 
     def help(self):
-        ret = "command available:"
+        ret = "Command available:"
         for cmd in self.cmds:
             if cmd.helpable:
                 if isinstance(cmd.keyword, str):
@@ -195,11 +198,11 @@ class Rpg(threading.Thread):
 
     def comands_init(self):
         cmds = []
-        cmd = command(["!fireball", "!fireball?"], self.fireball, "Fireball")
+        cmd = Command(["!fireball", "!fireball?"], self.fireball, "Fireball")
         cmds.append(cmd)
-        cmd = command(["!heal", "!heal?"], self.heal, "Heal")
+        cmd = Command(["!heal", "!heal?"], self.heal, "Heal")
         cmds.append(cmd)
-        cmd = command(["!reload", "!reload?"], self.reload, "Heal")
+        cmd = Command(["!reload", "!reload?"], self.reload, "Heal")
         cmds.append(cmd)
         self.cmds = cmds
 
@@ -219,5 +222,5 @@ class Player:
         self.pseudo = pseudo
         self.hp = hp
         self.mana = mana
-        self.cost_reduction=0
-        self.magic_upgrade=0
+        self.cost_reduction = 0
+        self.magic_upgrade = 0
