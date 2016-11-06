@@ -47,11 +47,11 @@ class Transferrer(threading.Thread):
                         if msg_type == "Public_Message":
                             send_private_message(
                                 chr(3) + str(
-                                    self.couleur) + "Message from channel " + self.channel + " : " + user + ">" + message,
+                                    self.couleur) +  self.channel + " : " + user + ">" + message,
                                 self.pseudo, self.send_sock)
                         elif msg_type == "Private_Message":
                             send_private_message(
-                                chr(3) + str(self.couleur) + "Message from user " + user + ">" + message, self.pseudo,
+                                chr(3) + str(self.couleur) + "Private message from user " + user + ">" + message, self.pseudo,
                                 self.send_sock)
                         elif msg_type == "JOIN":
                             self.users.append(user)

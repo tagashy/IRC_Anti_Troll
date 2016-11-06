@@ -68,12 +68,12 @@ def transferrer_public(pseudo, param, sock):
             channel = param[2]
             if check_valid_sever(server_addr, channel, port):
                 send_public_message("sorry you choose this channel, I can't agree it will create a loophole!!!", sock)
-            elif check_not_already_use_transferer(server_addr, channel, port, pseudo):
+            elif check_not_already_use_transferer(server_addr, channel, port,pseudo):
                 send_public_message("Transferer already exist", sock)
             else:
                 external_bot_name = "user_" + str(num_genrator.randint(1000, 1000 * 1000))
                 print "[!] name of transferer user:" + external_bot_name
-                transfer = Transferrer(addr, channel, port, external_bot_name, sock, pseudo, couleur=color)
+                transfer = Transferrer(server_addr, channel, port, external_bot_name, sock, pseudo, couleur=color)
                 transfer.start()
                 color += 1
                 if color > 15:
@@ -97,16 +97,16 @@ def transferrer_public(pseudo, param, sock):
             channel = param[2]
             if check_valid_sever(server_addr, channel, port):
                 send_public_message("sorry you choose this channel, I can't agree it will create a loophole!!!", sock)
-            elif check_not_already_use_transferer(server_addr, channel, port, pseudo):
+            elif check_not_already_use_transferer(server_addr, channel, port, None):
                 send_public_message("Transferer already exist", sock)
             else:
                 send_type = param[3]
                 external_bot_name = "user_" + str(num_genrator.randint(1000, 1000 * 1000))
                 print "[!] name of transferer user:" + external_bot_name
                 if send_type.lower() == "publique" or send_type.lower() == "public":
-                    transfer = Transferrer(addr, channel, port, external_bot_name, sock, couleur=color)
+                    transfer = Transferrer(server_addr, channel, port, external_bot_name, sock, couleur=color)
                 else:
-                    transfer = Transferrer(addr, channel, port, external_bot_name, sock, pseudo, couleur=color)
+                    transfer = Transferrer(server_addr, channel, port, external_bot_name, sock, pseudo, couleur=color)
                 transfer.start()
                 color += 1
                 if color > 15:
@@ -149,7 +149,7 @@ def transferrer_private(pseudo, param, sock):
             else:
                 external_bot_name = "user_" + str(num_genrator.randint(1000, 1000 * 1000))
                 print "[!] name of transferer user:" + external_bot_name
-                transfer = Transferrer(addr, channel, port, external_bot_name, sock, pseudo, couleur=color)
+                transfer = Transferrer(server_addr, channel, port, external_bot_name, sock, pseudo, couleur=color)
                 transfer.start()
                 color += 1
                 if color > 15:
@@ -176,16 +176,16 @@ def transferrer_private(pseudo, param, sock):
             elif check_valid_sever(server_addr, channel, port):
                 send_private_message("sorry you choose this channel, I can't agree it will create a loophole!!!",
                                      pseudo, sock)
-            elif check_not_already_use_transferer(server_addr, channel, port, pseudo):
+            elif check_not_already_use_transferer(server_addr, channel, port, None):
                 send_private_message("Transferer already exist", pseudo, sock)
             else:
                 send_type = param[3]
                 external_bot_name = "user_" + str(num_genrator.randint(1000, 1000 * 1000))
                 print "[!] name of transferer user:" + external_bot_name
                 if send_type.lower() == "publique" or send_type.lower() == "public":
-                    transfer = Transferrer(addr, channel, port, external_bot_name, sock, couleur=color)
+                    transfer = Transferrer(server_addr, channel, port, external_bot_name, sock, couleur=color)
                 else:
-                    transfer = Transferrer(addr, channel, port, external_bot_name, sock, pseudo, couleur=color)
+                    transfer = Transferrer(server_addr, channel, port, external_bot_name, sock, pseudo, couleur=color)
                 transfer.start()
                 color += 1
                 if color > 15:
@@ -197,6 +197,9 @@ def transferrer_private(pseudo, param, sock):
 
 def check_not_already_use_transferer(server_addr, channel, external_port, target=None):
     for tr in transferrer_list:
+        if debug:
+            print "[D]",server_addr, channel, external_port, tr.addr, tr.channel, tr.port,tr.pseudo,target
+            print "[D]",tr.pseudo == target
         if check_valid_sever(server_addr, channel, external_port, tr.addr, tr.channel, tr.port) and tr.pseudo == target:
             return 1
 
@@ -207,8 +210,12 @@ def check_valid_sever(server_addr, channel, external_port, comp_serv=main_server
     if server_addr[-1:] == ".":
         server_addr = server_addr[:-1]
     channel = channel.lower()
-    external_addrs = getaddrinfo(server_addr, external_port)
-    addrs = getaddrinfo(comp_serv, comp_port)
+    try:
+        external_addrs = getaddrinfo(server_addr, external_port)
+        addrs = getaddrinfo(comp_serv, comp_port)
+    except:
+        print "[W] Invalid Address"
+        return 1
     if debug:
         print "[D] ip address of server {}".format(addrs)
     for data in addrs:
@@ -281,6 +288,8 @@ def suppress_transferrer_public(param, sock):
                     tr.stop()
                     tr_stopped = True
                     print "[!] transferrer " + tr.channel + " stopped"
+                    transferrer_list.remove(tr)
+                    send_public_message("transferrer " + tr.channel + " stopped", sock)
             if not tr_stopped:
                 send_public_message("no transferrer like this one", sock)
 
@@ -311,6 +320,9 @@ def suppress_transferrer_private(pseudo, param, sock):
                     tr.stop()
                     tr_stopped = True
                     print "[!] transferrer " + tr.channel + " stopped"
+                    transferrer_list.remove(tr)
+                    send_private_message("transferrer " + tr.channel + " stopped", pseudo, sock)
+
             if not tr_stopped:
                 send_private_message("no transferrer like this one", pseudo, sock)
 
