@@ -320,7 +320,7 @@ def start_rpg(pseudo, message, msg_type, sock):
     rpg_game = None
     if len(param) == 1:
         if "?" in param[0]:
-            send_public_message("!rpg (server) (channel) ", sock)
+            send_public_message("!rpg <server|optional> <channel|optional> ", sock)
         else:
             rpg_channel = "#RPG_" + str(num_genrator.randint(1000, 1000 * 1000))
             send_public_message("Starting RPG Game in channel : " + rpg_channel, sock)
@@ -328,7 +328,7 @@ def start_rpg(pseudo, message, msg_type, sock):
             rpg_game.start()
     elif len(param) == 2:
         if "?" in param[0] or "?" in param[1]:
-            send_public_message("!rpg server (channel) ", sock)
+            send_public_message("!rpg <server|optional> <channel|optional> ", sock)
         else:
             addr = param[1]
             server_addr = addr.split(":")
@@ -369,10 +369,10 @@ def stop_rpg(pseudo, message, msg_type, sock):
     param = message.split()
     if len(param) == 1:
         if "?" in param[0]:
-            send_public_message("!kill_rpg server channel ", sock)
+            send_public_message("!kill_rpg <server|require> <channel|require>", sock)
     elif len(param) > 1:
         if "?" in param[0] or "?" in param[1]:
-            send_public_message("!kill_rpg server channel ", sock)
+            send_public_message("!kill_rpg <server|require> <channel|require>", sock)
         elif len(param) == 3:
             addr = param[1]
             server_addr = addr.split(":")
