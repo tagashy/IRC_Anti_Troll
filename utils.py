@@ -5,7 +5,7 @@ from message_parsing import parse_name_list,create_reg_user_list
 
 def create_irc_socket(addr, bot_name, channel, port=6667):
     name_list_reg=create_reg_user_list(bot_name,channel)
-    users=None
+    users=[]
     recv_sock = socket(AF_INET, SOCK_STREAM)
     recv_sock.connect((addr, port))
     recv_sock.send("USER " + bot_name + " Bot Bot Bot\r\n")
@@ -29,7 +29,7 @@ def create_irc_socket(addr, bot_name, channel, port=6667):
 
             if "353" in res:
                 print "[!] creation of user list"
-                users = parse_name_list(res,name_list_reg)
+                users += parse_name_list(res,name_list_reg)
 
     except:
         recv_sock.settimeout(None)

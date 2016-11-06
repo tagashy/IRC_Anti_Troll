@@ -3,6 +3,9 @@ from config import *
 
 name_reg = re.compile("(?<=:)[^!]*(?=!)")
 msg_type_reg = re.compile("(?<= PRIVMSG )[^:]*(?= :)")
+join_reg = re.compile("(?<= JOIN :).*")
+quit_reg = re.compile("(?<= QUIT :).*")
+part_reg = re.compile("(?<= PART ).*")
 
 
 # pub_content_reg = re.compile("(?<= PRIVMSG " + channel + " :).*")
@@ -26,9 +29,6 @@ def get_content_private_msg(msg, private_content_reg):  # =priv_content_reg):
         return private_content
     else:
         print "[W] ERROR IN PARSING OF PRIVATE MESSAGE"
-
-
-
 
 
 def parse_name_list(msg, name_list_reg):
@@ -72,18 +72,32 @@ def parse_msg(msg, public_content_reg, private_content_reg, external_bot_name, e
             msg_type = "Private_Message"
         elif target == external_channel:
             msg_type = "Public_Message"
+    else:
+        join_res=join_reg.search(msg)
+        quit_res=quit_reg.search(msg)
+        part_res=part_reg.search(msg)
+        if join_res:
+            msg_type = "JOIN"
+        elif quit_res:
+            msg_type = "QUIT"
+        elif part_res:
+            msg_type = "PART"
         else:
             msg_type = "UNDEFINED"
-    else:
-        msg_type = "NONE"
     # parsing content
     if msg_type == "Private_Message":
         msg_content = get_content_private_msg(msg, private_content_reg)
     elif msg_type == "Public_Message":
         msg_content = get_content_public_msg(msg, public_content_reg)
-    else:
+    elif msg_type == "JOIN":
+        msg_content = join_res.group(0)
+    elif msg_type == "QUIT":
+        msg_content = quit_res.group(0)
+    elif msg_type == "PART":
+        msg_content = part_res.group(0)
+    elif msg_type == "UNDEFINED":
         msg_content = "NONE"
         if debug:
             print "[W] ERROR IN MSG TYPE"
-    msg_content = msg_content.replace("\r", "").replace("\n", "").replace("\b","")
+    msg_content = msg_content.replace("\r", "").replace("\n", "").replace("\b", "")
     return name, msg_content, msg_type

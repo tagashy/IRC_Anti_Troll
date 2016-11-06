@@ -49,9 +49,24 @@ class Transferrer(threading.Thread):
                                 chr(3) + str(
                                     self.couleur) + "Message from channel " + self.channel + " : " + user + ">" + message,
                                 self.pseudo, self.send_sock)
-                        else:
+                        elif msg_type == "Private_Message":
                             send_private_message(
                                 chr(3) + str(self.couleur) + "Message from user " + user + ">" + message, self.pseudo,
+                                self.send_sock)
+                        elif msg_type == "JOIN":
+                            self.users.append(user)
+                            send_private_message(
+                                chr(3) + str(self.couleur) + "User " + user + " has join channel", self.pseudo,
+                                self.send_sock)
+                        elif msg_type == "QUIT":
+                            self.users.remove(user)
+                            send_private_message(
+                                chr(3) + str(self.couleur) + "User " + user + " has quit server with msg : "+message, self.pseudo,
+                                self.send_sock)
+                        elif msg_type == "PART":
+                            self.users.remove(user)
+                            send_private_message(
+                                chr(3) + str(self.couleur) + "User " + user + " has quit channel with msg : "+message, self.pseudo,
                                 self.send_sock)
                     else:
                         if debug:
@@ -61,9 +76,24 @@ class Transferrer(threading.Thread):
                                 chr(3) + str(
                                     self.couleur) + "Message from channel " + self.channel + " : " + user + ">" + message,
                                 self.send_sock)
-                        else:
+                        elif msg_type == "Private_Message":
                             send_public_message(
                                 chr(3) + str(self.couleur) + "Message from user " + user + ">" + message,
+                                self.send_sock)
+                        elif msg_type == "JOIN":
+                            self.users.append(user)
+                            send_private_message(
+                                chr(3) + str(self.couleur) + "User " + user + " has join channel", self.pseudo,
+                                self.send_sock)
+                        elif msg_type == "QUIT":
+                            self.users.remove(user)
+                            send_private_message(
+                                chr(3) + str(self.couleur) + "User " + user + " has quit server with msg : "+message, self.pseudo,
+                                self.send_sock)
+                        elif msg_type == "PART":
+                            self.users.remove(user)
+                            send_private_message(
+                                chr(3) + str(self.couleur) + "User " + user + " has quit channel with msg : "+message, self.pseudo,
                                 self.send_sock)
             except:
                 pass
