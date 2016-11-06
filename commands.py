@@ -46,13 +46,13 @@ def transfert_message_from_other_place(pseudo, message, msg_type, sock):
 
 
 def transferrer_public(pseudo, param, sock):
-    global color, transferrer_list
+    global color
     if len(param) == 1:
         if "?" in param[0]:
-            send_public_message("!transfert server channel (Private/Publique)", sock)
+            send_public_message("!transfert <server|require> <#channel|require> <private/public|optional>", sock)
     elif len(param) > 1:
         if "?" in param[0] or "?" in param[1]:
-            send_public_message("!transfert server channel (Private/Publique)", sock)
+            send_public_message("!transfert <server|require> <#channel|require> <private/public|optional>", sock)
         elif len(param) == 3:
             addr = param[1]
             server_addr = addr.split(":")
@@ -117,13 +117,15 @@ def transferrer_public(pseudo, param, sock):
 
 
 def transferrer_private(pseudo, param, sock):
-    global color, transferrer_list
+    global color
     if len(param) == 1:
         if "?" in param[0]:
-            send_private_message("!transfert server channel (Private/Publique)",pseudo, sock)
+            send_private_message("!transfert <server|require> <#channel|require> <private/public|optional>", pseudo,
+                                 sock)
     elif len(param) > 1:
         if "?" in param[0] or "?" in param[1]:
-            send_private_message("!transfert server channel (Private/Publique)",pseudo, sock)
+            send_private_message("!transfert <server|require> <#channel|require> <private/public|optional>", pseudo,
+                                 sock)
         elif len(param) == 3:
             addr = param[1]
             server_addr = addr.split(":")
@@ -134,11 +136,14 @@ def transferrer_private(pseudo, param, sock):
                 port = int(server_addr[1])
                 server_addr = server_addr[0]
             else:
-                send_private_message("too much :",pseudo, sock)
+                send_private_message("too much :", pseudo, sock)
                 return
             channel = param[2]
-            if check_valid_sever(server_addr, channel, port):
-                send_private_message("sorry you choose this channel, I can't agree it will create a loophole!!!",pseudo, sock)
+            if channel[:1] != "#":
+                send_private_message("Not a valid channel", pseudo, sock)
+            elif check_valid_sever(server_addr, channel, port):
+                send_private_message("sorry you choose this channel, I can't agree it will create a loophole!!!",
+                                     pseudo, sock)
             elif check_not_already_use_transferer(server_addr, channel, port, pseudo):
                 send_private_message("Transferer already exist", sock)
             else:
@@ -151,7 +156,7 @@ def transferrer_private(pseudo, param, sock):
                     color = 2
                 print "[!] Transferring data from " + addr + channel + " started"
                 transferrer_list.append(transfer)
-                send_private_message("Transfert start",pseudo, sock)
+                send_private_message("Transfert start", pseudo, sock)
 
         elif len(param) == 4:
             addr = param[1]
@@ -166,10 +171,13 @@ def transferrer_private(pseudo, param, sock):
                 send_private_message("too much :", sock)
                 return
             channel = param[2]
-            if check_valid_sever(server_addr, channel, port):
-                send_private_message("sorry you choose this channel, I can't agree it will create a loophole!!!",pseudo, sock)
+            if channel[:1] != "#":
+                send_private_message("Not a valid channel", pseudo, sock)
+            elif check_valid_sever(server_addr, channel, port):
+                send_private_message("sorry you choose this channel, I can't agree it will create a loophole!!!",
+                                     pseudo, sock)
             elif check_not_already_use_transferer(server_addr, channel, port, pseudo):
-                send_private_message("Transferer already exist",pseudo, sock)
+                send_private_message("Transferer already exist", pseudo, sock)
             else:
                 send_type = param[3]
                 external_bot_name = "user_" + str(num_genrator.randint(1000, 1000 * 1000))
@@ -184,11 +192,10 @@ def transferrer_private(pseudo, param, sock):
                     color = 2
                 print "[!] Transferring data from " + addr + channel + " started"
                 transferrer_list.append(transfer)
-                send_private_message("Transfert start",pseudo, sock)
+                send_private_message("Transfert start", pseudo, sock)
 
 
 def check_not_already_use_transferer(server_addr, channel, external_port, target=None):
-    global transferrer_list
     for tr in transferrer_list:
         if check_valid_sever(server_addr, channel, external_port, tr.addr, tr.channel, tr.port) and tr.pseudo == target:
             return 1
@@ -242,12 +249,19 @@ def check_valid_sever(server_addr, channel, external_port, comp_serv=main_server
 
 def suppress_transferrer(pseudo, message, msg_type, sock):
     param = message.split()
+    if msg_type == "Public_Message":
+        suppress_transferrer_public(param, sock)
+    elif msg_type == "Private_Message":
+        suppress_transferrer_public(pseudo, param, sock)
+
+
+def suppress_transferrer_public(param, sock):
     if len(param) == 1:
         if "?" in param[0]:
-            send_public_message("!kill_transfert server channel ", sock)
+            send_public_message("!kill_transfert <server|require> <#channel|require>  ", sock)
     elif len(param) > 1:
         if "?" in param[0] or "?" in param[1]:
-            send_public_message("!kill_transfert server channel ", sock)
+            send_public_message("!kill_transfert <server|require> <#channel|require> ", sock)
         elif len(param) == 3:
             addr = param[1]
             server_addr = addr.split(":")
@@ -269,6 +283,36 @@ def suppress_transferrer(pseudo, message, msg_type, sock):
                     print "[!] transferrer " + tr.channel + " stopped"
             if not tr_stopped:
                 send_public_message("no transferrer like this one", sock)
+
+
+def suppress_transferrer_private(pseudo, param, sock):
+    if len(param) == 1:
+        if "?" in param[0]:
+            send_private_message("!kill_transfert <server|require> <#channel|require>  ", pseudo, sock)
+    elif len(param) > 1:
+        if "?" in param[0] or "?" in param[1]:
+            send_private_message("!kill_transfert <server|require> <#channel|require> ", pseudo, sock)
+        elif len(param) == 3:
+            addr = param[1]
+            server_addr = addr.split(":")
+            if len(server_addr) == 1:
+                server_addr = addr
+                port = 6667
+            elif len(server_addr) == 2:
+                port = int(server_addr[1])
+                server_addr = server_addr[0]
+            else:
+                send_private_message("too much :", pseudo, sock)
+                return
+            channel = param[2]
+            tr_stopped = False
+            for tr in transferrer_list:
+                if tr.port == port and tr.addr == server_addr and tr.channel == channel:
+                    tr.stop()
+                    tr_stopped = True
+                    print "[!] transferrer " + tr.channel + " stopped"
+            if not tr_stopped:
+                send_private_message("no transferrer like this one", pseudo, sock)
 
 
 def start_rpg(pseudo, message, msg_type, sock):
