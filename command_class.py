@@ -12,7 +12,7 @@ class Command:
 
 def commands_init():
     cmds = []
-    cmd = Command("!die " + bot_name, commands.DIE, "DIE")
+    cmd = Command("!die", commands.DIE, "DIE")
     cmds.append(cmd)
     cmd = Command(["!transfert", "!transfert?"], commands.transfert_message_from_other_place, "Tranfert")
     cmds.append(cmd)

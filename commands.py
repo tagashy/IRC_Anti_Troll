@@ -9,7 +9,8 @@ num_genrator = random.Random()
 num_genrator.seed()
 color = 2
 transferrer_list = []
-rpg_list=[]
+rpg_list = []
+
 
 def send_ticket_to_ghozt(pseudo, message, msg_type, sock):
     if msg_type == "Public_Message":
@@ -18,7 +19,7 @@ def send_ticket_to_ghozt(pseudo, message, msg_type, sock):
 
 
 def send_public_message(message, sock):
-    sock.send("PRIVMSG " + channel + " :" + message + "\r\n")
+    sock.send("PRIVMSG " + main_channel + " :" + message + "\r\n")
 
 
 def send_private_message(message, pseudo, sock):
@@ -58,15 +59,8 @@ def transfert_message_from_other_place(pseudo, message, msg_type, sock):
                 send_public_message("too much :", sock)
                 return
             channel = param[2]
-            addrs=getaddrinfo(main_server,main_port)
-            for adresse in addrs:
-                if adresse == server_addr and channel == main_channel:
-                    send_public_message("sorry you choose this channel, I can't agree it will create a loophole!!!")
-                    return
-            if channel == main_channel and server_addr == main_server:
-                if adresse == server_addr and channel == main_channel:
-                    send_public_message("sorry you choose this channel, I can't agree it will create a loophole!!!")
-                    return
+            if check_valid_sever(server_addr,channel,port):
+                send_public_message("sorry you choose this channel, I can't agree it will create a loophole!!!", sock)
             else:
                 external_bot_name = "user_" + str(num_genrator.randint(1000, 1000 * 1000))
                 print "[!] name of transferer user:" + external_bot_name
@@ -75,7 +69,7 @@ def transfert_message_from_other_place(pseudo, message, msg_type, sock):
                 color += 1
                 print "[!] Transferring data from " + addr + channel + " started"
                 transferrer_list.append(transfer)
-                send_public_message("Transfert start")
+                send_public_message("Transfert start", sock)
 
         elif len(param) == 4:
             addr = param[1]
@@ -90,17 +84,65 @@ def transfert_message_from_other_place(pseudo, message, msg_type, sock):
                 send_public_message("too much :", sock)
                 return
             channel = param[2]
-            send_type = param[3]
-            external_bot_name = "user_" + str(num_genrator.randint(1000, 1000 * 1000))
-            print "[!] name of transferer user:" + external_bot_name
-            if send_type.lower() == "publique" or send_type.lower() == "public":
-                transfer = Transferrer(addr, channel, port, external_bot_name, sock, couleur=color)
+            if check_valid_sever(server_addr,channel,port):
+                send_public_message("sorry you choose this channel, I can't agree it will create a loophole!!!", sock)
             else:
-                transfer = Transferrer(addr, channel, port, external_bot_name, sock, pseudo, couleur=color)
-            transfer.start()
-            color += 1
-            print "[!] Transferring data from " + addr + channel + " started"
-            transferrer_list.append(transfer)
+                send_type = param[3]
+                external_bot_name = "user_" + str(num_genrator.randint(1000, 1000 * 1000))
+                print "[!] name of transferer user:" + external_bot_name
+                if send_type.lower() == "publique" or send_type.lower() == "public":
+                    transfer = Transferrer(addr, channel, port, external_bot_name, sock, couleur=color)
+                else:
+                    transfer = Transferrer(addr, channel, port, external_bot_name, sock, pseudo, couleur=color)
+                transfer.start()
+                color += 1
+                print "[!] Transferring data from " + addr + channel + " started"
+                transferrer_list.append(transfer)
+                send_public_message("Transfert start", sock)
+
+
+def check_valid_sever(server_addr, channel,external_port):
+    server_addr=server_addr.lower()
+    if server_addr[-1:]==".":
+        server_addr=server_addr[:-1]
+    channel=channel.lower()
+    external_addrs=getaddrinfo(server_addr, external_port)
+    addrs = getaddrinfo(main_server, main_port)
+    if debug:
+        print "[D] ip address of server {}".format(addrs)
+    for data in addrs:
+        if len(data)>=5:
+            adresse = data[4][0]
+        else:
+            adresse=""
+        if debug:
+            print "[D] adresse of main serv '{}', adresse of external serv '{}', equal :{}".format(adresse, server_addr,
+                                                                                                   adresse == server_addr)
+            print "[D] channel of main serv '{}', channel of external serv '{}', equal :{}".format(main_channel,
+                                                                                                   channel,
+                                                                                                   main_channel == channel)
+        if adresse == server_addr and channel == main_channel:
+            return 1
+        for external_data in external_addrs:
+            if len(data)>=5:
+                external_adresse = data[4][0]
+            else:
+                external_adresse=""
+            if debug:
+                print "[D] ip adresse of main serv '{}', adresse of external serv '{}', equal :{}".format(adresse, server_addr,
+                                                                                                   adresse == external_adresse)
+                print "[D] channel of main serv '{}', channel of external serv '{}', equal :{}".format(main_channel,
+                                                                                                   channel,
+                                                                                                   main_channel == channel)
+            if adresse == external_adresse and channel == main_channel:
+                return 1
+    if debug:
+        print "[D] adresse of main serv '{}', adresse of external serv '{}', equal :{}".format(main_server, server_addr,
+                                                                                               main_server == server_addr)
+        print "[D] channel of main serv '{}', channel of external serv '{}', equal :{}".format(main_channel, channel,
+                                                                                               main_channel == channel)
+    if channel == main_channel and server_addr == main_server:
+        return 1
 
 
 def suppress_transferrer(pseudo, message, msg_type, sock):
@@ -131,21 +173,21 @@ def suppress_transferrer(pseudo, message, msg_type, sock):
                     tr_stopped = True
                     print "[!] transferrer " + tr.channel + " stopped"
             if not tr_stopped:
-                send_public_message("no transferrer like this one",sock)
+                send_public_message("no transferrer like this one", sock)
 
 
 def start_rpg(pseudo, message, msg_type, sock):
     param = message.split()
-    rpg_game=None
+    rpg_game = None
     if len(param) == 1:
         if "?" in param[0]:
             send_public_message("!rpg (server) (channel) ", sock)
         else:
             rpg_channel = "#RPG_" + str(num_genrator.randint(1000, 1000 * 1000))
-            send_public_message("Starting RPG Game in channel : "+rpg_channel,sock)
-            rpg_game=rpg.Rpg(main_server,"RPG_MASTER",rpg_channel,main_port)
+            send_public_message("Starting RPG Game in channel : " + rpg_channel, sock)
+            rpg_game = rpg.Rpg(main_server, "RPG_MASTER", rpg_channel, main_port)
             rpg_game.start()
-    elif len(param) == 1:
+    elif len(param) == 2:
         if "?" in param[0] or "?" in param[1]:
             send_public_message("!rpg server (channel) ", sock)
         else:
@@ -161,9 +203,9 @@ def start_rpg(pseudo, message, msg_type, sock):
                 send_public_message("too much :", sock)
                 return
             rpg_channel = "#RPG_" + str(num_genrator.randint(1000, 1000 * 1000))
-            rpg_game = rpg.Rpg(server_addr, "RPG_MASTER", rpg_channel, port)
+            rpg_game = rpg.Rpg(server_addr, "RPG_MASTER"+ str(num_genrator.randint(1000, 1000 * 1000)), rpg_channel, port)
             rpg_game.start()
-            send_public_message("Starting RPG Game on server"+addr+" in channel : " + rpg_channel,sock)
+            send_public_message("Starting RPG Game on server" + addr + " in channel : " + rpg_channel, sock)
     else:
         addr = param[1]
         server_addr = addr.split(":")
@@ -176,11 +218,12 @@ def start_rpg(pseudo, message, msg_type, sock):
         else:
             send_public_message("too much :", sock)
             return
-        rpg_game = rpg.Rpg(server_addr, "RPG_MASTER"+str(num_genrator.randint(0,1000*1000)), param[2], port)
+        rpg_game = rpg.Rpg(server_addr, "RPG_MASTER" + str(num_genrator.randint(0, 1000 * 1000)), param[2], port)
         rpg_game.start()
-        send_public_message("Starting RPG Game on server" + addr + " in channel : " + param[2],sock)
+        send_public_message("Starting RPG Game on server" + addr + " in channel : " + param[2], sock)
     if rpg_game is not None:
         rpg_list.append(rpg_game)
+
 
 def stop_rpg(pseudo, message, msg_type, sock):
     param = message.split()
@@ -210,22 +253,22 @@ def stop_rpg(pseudo, message, msg_type, sock):
                     tr_stopped = True
                     print "[!] RPG " + rpg_game.channel + " stopped"
             if not tr_stopped:
-                send_public_message("no RPG like this one",sock)
+                send_public_message("no RPG like this one", sock)
 
-def migration(pseudo, message, msg_type, sock,entry="IRC"):
+
+def migration(pseudo, message, msg_type, sock, entry="IRC"):
     global channel
     param = message.split()
     if len(param) == 1:
         if "?" in param[0]:
             if entry == "IRC":
-                send_private_message("!migrate channel (server)",pseudo,sock)
+                send_private_message("!migrate channel (server)", pseudo, sock)
             elif entry == "STDIN":
                 print "!migrate channel (server)"
     elif len(param) == 2:
-        sock.send("JOIN "+param[2])
-        sock.send("PART "+channel)
-        channel=param[2]
-
+        sock.send("JOIN " + param[2])
+        sock.send("PART " + channel)
+        channel = param[2]
 
 
 from transfert_class import Transferrer
