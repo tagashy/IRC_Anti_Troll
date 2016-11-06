@@ -1,6 +1,6 @@
 import commands
 from config import *
-from commands import send_ticket_to_ghozt
+
 
 class Command:
     def __init__(self, keyword, function, name, helpable=True):
@@ -29,7 +29,7 @@ def command_loop(pseudo, message, msg_type, sock, cmds):
     if "!help" == message:
         help_cmd(cmds,sock)
     elif "help" in message or "aide" in message:
-        send_ticket_to_ghozt(pseudo, message, msg_type, sock)
+        commands.send_ticket_to_ghozt(pseudo, message, msg_type, sock)
     for cmd in cmds:
         if isinstance(cmd.keyword, str):
             if message == cmd.keyword:
@@ -56,4 +56,4 @@ def help_cmd(cmds, sock):
 
 
 def send_public_message(message, sock):
-    sock.send("PRIVMSG " + channel + " :" + message + "\r\n")
+    sock.send("PRIVMSG " + main_channel + " :" + message + "\r\n")

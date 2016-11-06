@@ -58,13 +58,24 @@ def transfert_message_from_other_place(pseudo, message, msg_type, sock):
                 send_public_message("too much :", sock)
                 return
             channel = param[2]
-            external_bot_name = "user_" + str(num_genrator.randint(1000, 1000 * 1000))
-            print "[!] name of transferer user:" + external_bot_name
-            transfer = Transferrer(addr, channel, port, external_bot_name, sock, pseudo, couleur=color)
-            transfer.start()
-            color += 1
-            print "[!] Transferring data from " + addr + channel + " started"
-            transferrer_list.append(transfer)
+            addrs=getaddrinfo(main_server,main_port)
+            for adresse in addrs:
+                if adresse == server_addr and channel == main_channel:
+                    send_public_message("sorry you choose this channel, I can't agree it will create a loophole!!!")
+                    return
+            if channel == main_channel and server_addr == main_server:
+                if adresse == server_addr and channel == main_channel:
+                    send_public_message("sorry you choose this channel, I can't agree it will create a loophole!!!")
+                    return
+            else:
+                external_bot_name = "user_" + str(num_genrator.randint(1000, 1000 * 1000))
+                print "[!] name of transferer user:" + external_bot_name
+                transfer = Transferrer(addr, channel, port, external_bot_name, sock, pseudo, couleur=color)
+                transfer.start()
+                color += 1
+                print "[!] Transferring data from " + addr + channel + " started"
+                transferrer_list.append(transfer)
+                send_public_message("Transfert start")
 
         elif len(param) == 4:
             addr = param[1]

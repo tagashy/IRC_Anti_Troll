@@ -15,14 +15,22 @@ def create_irc_socket(addr, bot_name, channel, port=6667):
     try:
         while 1:
             res = recv_sock.recv(1024)
-            if "[Throttled]" in res or "[Registration timeout]" in res or "ERROR :Closing link:" in res:
-                print "[W] Unable to refister"
+            if debug:
+                print res
+            if "[Throttled]" in res:
+                print "[W] Unable to refister because of throttled connection"
                 exit(0)
+            elif "[Registration timeout]" in res:
+                print "[W] Unable to refister because of Registration Timeout"
+                exit(0)
+            elif "ERROR :Closing link:" in res:
+                print "[W] Unable to refister because host close the link"
+                exit(0)
+
             if "353" in res:
                 print "[!] creation of user list"
                 users = parse_name_list(res,name_list_reg)
-            if debug:
-                print res
+
     except:
         recv_sock.settimeout(None)
         recv_sock.send("JOIN " + channel + "\r\n")

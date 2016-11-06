@@ -66,7 +66,6 @@ class Rpg(threading.Thread):
 
     def main_loop(self):
         while 1:
-
             for player in self.players:
                 if player.hp <= 0:
                     self.send_public_message("Player " + player.pseudo + " is dead")
@@ -85,9 +84,9 @@ class Rpg(threading.Thread):
                 elif res.strip() != "":
                     if debug:
                         print res
-                    user, message, msg_type = parse_msg(res, pub_reg, priv_reg, self.bot_name,
+                    user, message, msg_type = parse_msg(res, self.pub_reg, self.priv_reg, self.bot_name,
                                                         self.channel)
-
+                    self.command_choice(message,user)
 
             except:
                 pass

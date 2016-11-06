@@ -79,12 +79,12 @@ def send_loop(sock, target):
 
 
 def init_bot():
-    users, sock = utils.create_irc_socket(main_server, bot_name, channel, main_port)
-    thread.start_new_thread(recv_loop, (sock, bot_name, channel))
+    users, sock = utils.create_irc_socket(main_server, bot_name, main_channel, main_port)
+    thread.start_new_thread(recv_loop, (sock, bot_name, main_channel))
     send_loop(sock, "Tagashy")
     sock.send("QUIT : va faire une revision\r\n")
     sock.close()
 
 # init_bot()
-TagaBot=bot(main_server,bot_name,channel,main_port)
+TagaBot=bot(main_server, bot_name, main_channel, main_port)
 TagaBot.start()

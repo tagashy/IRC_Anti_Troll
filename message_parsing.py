@@ -85,5 +85,5 @@ def parse_msg(msg, public_content_reg, private_content_reg, external_bot_name, e
         msg_content = "NONE"
         if debug:
             print "[W] ERROR IN MSG TYPE"
-    msg_content = msg_content.replace("\r", "").replace("\n", "")
+    msg_content = msg_content.replace("\r", "").replace("\n", "").replace("\b","")
     return name, msg_content, msg_type
