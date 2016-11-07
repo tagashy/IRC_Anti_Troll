@@ -174,7 +174,7 @@ def transferrer_private(pseudo, param, sock):
             if channel[:1] != "#":
                 send_private_message("Not a valid channel", pseudo, sock)
             elif check_valid_sever(server_addr, channel, port):
-                send_private_message("sorry you choose this channel, I can't agree it will create a loophole!!!",
+                send_private_message("sorry I can't agree it will create a loophole!!!",
                                      pseudo, sock)
             elif check_not_already_use_transferer(server_addr, channel, port, None):
                 send_private_message("Transferer already exist", pseudo, sock)
