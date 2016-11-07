@@ -1,17 +1,18 @@
 from socket import *
 from config import *
-from message_parsing import parse_name_list,create_reg_user_list
-
+import re
 
 def create_irc_socket(addr, bot_name, channel, port=6667):
-    name_list_reg=create_reg_user_list(bot_name,channel)
-    users=[]
+    name_list_reg = re.compile("(?<= 353 " + bot_name + " = " + channel + " :).*")
+    if debug:
+        print_message("(?<= 353 " + bot_name + " = " + channel + " :).*")
+    users = []
     recv_sock = socket(AF_INET, SOCK_STREAM)
     recv_sock.connect((addr, port))
     recv_sock.send("USER " + bot_name + " Bot Bot Bot\r\n")
     recv_sock.send("NICK " + bot_name + "\r\n")
-    print "[!] Authentification to "+addr+" send"
-    recv_sock.settimeout(5)
+    print "[!] Authentification to " + addr + " send"
+    recv_sock.settimeout(2)
     try:
         while 1:
             res = recv_sock.recv(1024)
@@ -29,10 +30,36 @@ def create_irc_socket(addr, bot_name, channel, port=6667):
 
             if "353" in res:
                 print "[!] creation of user list"
-                users += parse_name_list(res,name_list_reg)
-
+                users += parse_name_list(res, name_list_reg)
+                if debug:
+                    print_message("[D] users of channel {}:{}".format(channel,users))
     except:
         recv_sock.settimeout(None)
         recv_sock.send("JOIN " + channel + "\r\n")
         print "[!] Join " + channel + " send"
-    return users,recv_sock
+    return users, recv_sock
+
+
+def print_message(message, msg_type="STDIN", sock=None, pseudo=None):
+    if msg_type == "Private_Message":
+        send_private_message(message, pseudo, sock)
+    elif msg_type == "Public_Message":
+        send_public_message(message, sock)
+    elif msg_type == "STDIN":
+        print message
+
+
+def send_public_message(message, sock):
+    sock.send("PRIVMSG " + main_channel + " :" + message + "\r\n")
+
+
+def send_private_message(message, pseudo, sock):
+    sock.send("PRIVMSG " + pseudo + " :" + message + "\r\n")
+
+
+def parse_name_list(msg, name_list_reg):
+    name_list_res = name_list_reg.search(msg)
+    if name_list_res:
+        name_list = name_list_res.group(0)
+        names = name_list.split()
+        return names

@@ -1,11 +1,14 @@
 import re
 from config import *
+from utils import print_message
 
 name_reg = re.compile("(?<=:)[^!]*(?=!)")
 msg_type_reg = re.compile("(?<= PRIVMSG )[^:]*(?= :)")
 join_reg = re.compile("(?<= JOIN :).*")
 quit_reg = re.compile("(?<= QUIT :).*")
 part_reg = re.compile("(?<= PART ).*")
+message_regex = re.compile(
+    r"^(?::(([^@!\ ]*)(?:(?:!([^@]*))?@([^\ ]*))?)\ )?([^\ ]+)((?:\ [^:\ ][^\\]*){0,14})(?:\ :?(.*))?$", re.VERBOSE)
 
 
 # pub_content_reg = re.compile("(?<= PRIVMSG " + channel + " :).*")
@@ -19,7 +22,7 @@ def get_content_public_msg(msg, public_content_reg):  # =pub_content_reg):
         public_content = public_content_res.group(0)
         return public_content
     else:
-        print "[W] ERROR IN PARSING OF PUBLIC MESSAGE"
+        print_message("[W] ERROR IN PARSING OF PUBLIC MESSAGE")
 
 
 def get_content_private_msg(msg, private_content_reg):  # =priv_content_reg):
@@ -28,31 +31,64 @@ def get_content_private_msg(msg, private_content_reg):  # =priv_content_reg):
         private_content = private_content_res.group(0)
         return private_content
     else:
-        print "[W] ERROR IN PARSING OF PRIVATE MESSAGE"
-
-
-def parse_name_list(msg, name_list_reg):
-    name_list_res = name_list_reg.search(msg)
-    if name_list_res:
-        name_list = name_list_res.group(0)
-        names = name_list.split()
-        return names
-
-
-def create_reg_user_list(bot_name, channel):
-    name_list_reg = re.compile("(?<= 353 " + bot_name + " = " + channel + " :).*")
-    if debug:
-        print "(?<= 353 " + bot_name + " = " + channel + " :).*"
-    return name_list_reg
+        print_message("[W] ERROR IN PARSING OF PRIVATE MESSAGE")
 
 
 def init_parsing_channel(bot_name, channel):
     public_content_reg = re.compile("(?<= PRIVMSG " + channel + " :).*")
     private_content_reg = re.compile("(?<= PRIVMSG " + bot_name + " :).*")
     if debug:
-        print "(?<= PRIVMSG " + channel + " :).*"
-        print "(?<= PRIVMSG " + bot_name + " :).*"
+        print_message("(?<= PRIVMSG " + channel + " :).*")
+        print_message("(?<= PRIVMSG " + bot_name + " :).*")
     return public_content_reg, private_content_reg
+
+
+def new_parsing(msg):
+    msg = msg.replace("\r", "").replace("\n", "").replace("\b", "")
+    full_username = pseudo = user_account = ip = msg_type = content = target = ""
+    msg_parsed = message_regex.search(msg)
+    if msg_parsed:
+        data = msg_parsed.groups()
+        if len(data) == 6:
+            full_username = data[0]
+            pseudo = data[1]
+            user_account = data[2]
+            ip = data[3]
+            msg_type = data[4]
+            content = data[5]
+            target = content.split(":")[0].replace(" ", "")
+        elif len(data) == 7:
+            full_username = data[0]
+            pseudo = data[1]
+            user_account = data[2]
+            ip = data[3]
+            msg_type = data[4]
+            content = data[5]
+            target = content.split(":")[0].replace(" ", "")
+        if content.startswith(" JOIN :"):
+            full_username = msg_type[1:]
+            msg_type = "JOIN"
+            pseudo = full_username.split("!")[0]
+            user_account = cut_at_cara(full_username, "!").split("@")[0]
+            ip = cut_at_cara(full_username, "@")
+            target = content.split(" JOIN :")[1]
+        content = cut_at_cara(content, ":")
+        if target.startswith("#"):
+            msg_type = "PUBMSG"
+        if debug:
+            print_message(
+                "[D] full username: '{}' pseudo: '{}' user acount: '{}' ip: '{}' msg type: '{}' content: '{}' target: '{}'".format(
+                    full_username, pseudo, user_account, ip, msg_type, content, target))
+
+    return full_username, pseudo, user_account, ip, msg_type, content, target
+
+
+def cut_at_cara(string, c):
+    index=string.find(c)
+    if index !=-1:
+        return string[index+1:]
+    else:
+        return string
 
 
 def parse_msg(msg, public_content_reg, private_content_reg, external_bot_name, external_channel):
@@ -62,20 +98,20 @@ def parse_msg(msg, public_content_reg, private_content_reg, external_bot_name, e
         name = reg_res.group(0)
     else:
         name = "NONE"
-        if debug:
-            print "[W] ERROR IN NAME"
+    if debug:
+        print_message("[W] ERROR IN NAME")
 
-    # parsing Public Private
+        # parsing Public Private
     if msg_type_res:
         target = msg_type_res.group(0)
         if target == external_bot_name:
-            msg_type = "Private_Message"
+            msg_type = "PRIVMSG"
         elif target == external_channel:
-            msg_type = "Public_Message"
+            msg_type = "PUBMSG"
     else:
-        join_res=join_reg.search(msg)
-        quit_res=quit_reg.search(msg)
-        part_res=part_reg.search(msg)
+        join_res = join_reg.search(msg)
+        quit_res = quit_reg.search(msg)
+        part_res = part_reg.search(msg)
         if join_res:
             msg_type = "JOIN"
         elif quit_res:
@@ -84,10 +120,10 @@ def parse_msg(msg, public_content_reg, private_content_reg, external_bot_name, e
             msg_type = "PART"
         else:
             msg_type = "UNDEFINED"
-    # parsing content
-    if msg_type == "Private_Message":
+            # parsing content
+    if msg_type == "PRIVMSG":
         msg_content = get_content_private_msg(msg, private_content_reg)
-    elif msg_type == "Public_Message":
+    elif msg_type == "PUBMSG":
         msg_content = get_content_public_msg(msg, public_content_reg)
     elif msg_type == "JOIN":
         msg_content = join_res.group(0)
@@ -98,6 +134,6 @@ def parse_msg(msg, public_content_reg, private_content_reg, external_bot_name, e
     elif msg_type == "UNDEFINED":
         msg_content = "NONE"
         if debug:
-            print "[W] ERROR IN MSG TYPE"
+            print_message("[W] ERROR IN MSG TYPE")
     msg_content = msg_content.replace("\r", "").replace("\n", "").replace("\b", "")
     return name, msg_content, msg_type

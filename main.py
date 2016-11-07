@@ -44,12 +44,13 @@ class bot(threading.Thread):
             if "PING" in res.split(" ")[0]:
                 self.sock.send(res.replace("PING", "PONG"))
             elif res.strip() != "":
-                pseudo, message, msg_type = message_parsing.parse_msg(res, self.public_content_reg,
-                                                                      self.private_content_reg, self.name,
-                                                                      self.channel)
-                command_loop(pseudo, message, msg_type, self.sock, self.cmds)
-                if message != "NONE":
-                    print "[" + msg_type + "]", "USER:", pseudo, "send:", message
+                print res
+                # pseudo, message, msg_type = message_parsing.parse_msg(res, self.public_content_reg,self.private_content_reg, self.name,self.channel)
+                full_username, pseudo, user_account, ip, msg_type, content, target = message_parsing.new_parsing(res)
+                # command_loop(pseudo, message, msg_type, self.sock, self.cmds)
+                command_loop(pseudo, content, msg_type, self.sock, self.cmds)
+                if content != "NONE":
+                    print "[" + msg_type + "]", "USER:", pseudo, "send:", content
 
 
 def recv_loop(sock, bot_name, channel):
@@ -59,8 +60,8 @@ def recv_loop(sock, bot_name, channel):
         if "PING" in res.split(" ")[0]:
             sock.send(res.replace("PING", "PONG"))
         elif res.strip() != "":
-            pseudo, message, msg_type = message_parsing.parse_msg(res, public_content_reg,
-                                                                  private_content_reg, bot_name, channel)
+            #pseudo, message, msg_type = message_parsing.parse_msg(res, public_content_reg, private_content_reg, bot_name, channel)
+            full_username, pseudo, user_account, ip, msg_type, message, target = new_parsing(res)
             command_loop(pseudo, message, msg_type, sock, cmds)
             if message != "NONE":
                 print "[" + msg_type + "]", "USER:", pseudo, "send:", message
@@ -85,6 +86,7 @@ def init_bot():
     sock.send("QUIT : va faire une revision\r\n")
     sock.close()
 
+
 # init_bot()
-TagaBot=bot(main_server, bot_name, main_channel, main_port)
+TagaBot = bot(main_server, bot_name, main_channel, main_port)
 TagaBot.start()

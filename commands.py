@@ -11,9 +11,16 @@ color = 2
 transferrer_list = []
 rpg_list = []
 
+def print_message(message,msg_type="STDIN",sock=None,pseudo=None):
+    if msg_type=="PRIVMSG":
+        send_private_message(message,pseudo,sock)
+    elif msg_type=="PUBMSG":
+        send_public_message(message,sock)
+    elif msg_type == "STDIN":
+        print message
 
 def send_ticket_to_ghozt(pseudo, message, msg_type, sock):
-    if msg_type == "Public_Message":
+    if msg_type == "PUBMSG":
         send_public_message("\x01ACTION pointe ghozt\x01", sock)
         send_public_message("il poura t'aider " + pseudo + " pour (" + message + ")", sock)
 
@@ -39,9 +46,9 @@ def DIE(pseudo, message, msg_type, sock):
 
 def transfert_message_from_other_place(pseudo, message, msg_type, sock):
     param = message.split()
-    if msg_type == "Public_Message":
+    if msg_type == "PUBMSG":
         transferrer_public(pseudo, param, sock)
-    elif msg_type == "Private_Message":
+    elif msg_type == "PRIVMSG":
         transferrer_private(pseudo, param, sock)
 
 

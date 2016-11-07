@@ -1,5 +1,5 @@
-bot_name = "TagaBot1"
-main_channel = "#root-me-troll"
+bot_name = "TagaBot"
+main_channel = "#root-me-bot"
 main_server="irc.root-me.org"
 main_port=6667
 debug = True
