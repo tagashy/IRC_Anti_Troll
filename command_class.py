@@ -27,7 +27,7 @@ def commands_init():
 
 def command_loop(pseudo, message, msg_type, sock, cmds):
     if "!help" == message:
-        help_cmd(cmds,sock)
+        help_cmd(cmds, sock)
     elif "help" in message or "aide" in message:
         commands.send_ticket_to_ghozt(pseudo, message, msg_type, sock)
     for cmd in cmds:

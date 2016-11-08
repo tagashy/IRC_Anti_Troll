@@ -1,7 +1,8 @@
+import threading
+
+import utils
 from commands import *
 from message_parsing import *
-import threading
-import utils
 
 
 class Transferrer(threading.Thread):

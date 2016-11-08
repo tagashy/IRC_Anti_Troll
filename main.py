@@ -43,11 +43,11 @@ class bot(threading.Thread):
             res = self.sock.recv(1024)
             for line in res.split("\r\n"):
                 if "PING" in line:
-                    self.sock.send(line.replace("PING", "PONG")+"\r\n")
+                    self.sock.send(line.replace("PING", "PONG") + "\r\n")
                 elif line.strip() != "":
                     print line
                     # pseudo, message, msg_type = message_parsing.parse_msg(res, self.public_content_reg,self.private_content_reg, self.name,self.channel)
-                    #full_username,\
+                    # full_username,\
                     pseudo, user_account, ip, msg_type, content, target = message_parsing.new_parsing(line)
                     # command_loop(pseudo, message, msg_type, self.sock, self.cmds)
                     command_loop(pseudo, content, msg_type, self.sock, self.cmds)
@@ -55,40 +55,5 @@ class bot(threading.Thread):
                         print "[" + msg_type + "]", "USER:", pseudo, "send:", content
 
 
-def recv_loop(sock, bot_name, channel):
-    public_content_reg, private_content_reg = init_parsing_channel(bot_name, channel)
-    while (1):
-        res = sock.recv(1024)
-        if "PING" in res.split(" ")[0]:
-            sock.send(res.replace("PING", "PONG"))
-        elif res.strip() != "":
-            #pseudo, message, msg_type = message_parsing.parse_msg(res, public_content_reg, private_content_reg, bot_name, channel)
-            full_username, pseudo, user_account, ip, msg_type, message, target = new_parsing(res)
-            command_loop(pseudo, message, msg_type, sock, cmds)
-            if message != "NONE":
-                print "[" + msg_type + "]", "USER:", pseudo, "send:", message
-
-
-def send_loop(sock, target):
-    while (1):
-        exp = raw_input("enter python express:")
-        if exp.strip() == "new target":
-            target = raw_input("enter target:").strip()
-        elif exp.strip() == "end":
-            break
-        else:
-            exec ("tmp=" + exp)
-            sock.send("PRIVMSG " + target + " :" + tmp + "\r\n")
-
-
-def init_bot():
-    users, sock = utils.create_irc_socket(main_server, bot_name, main_channel, main_port)
-    thread.start_new_thread(recv_loop, (sock, bot_name, main_channel))
-    send_loop(sock, "Tagashy")
-    sock.send("QUIT : va faire une revision\r\n")
-    sock.close()
-
-
-# init_bot()
 TagaBot = bot(main_server, bot_name, main_channel, main_port)
 TagaBot.start()

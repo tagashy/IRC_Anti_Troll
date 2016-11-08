@@ -1,10 +1,9 @@
-import threading
-from socket import *
-from config import *
-import utils
-from message_parsing import *
 import random
+import threading
+
+import utils
 from command_class import Command
+from message_parsing import *
 
 num_genrator = random.Random()
 num_genrator.seed()
@@ -48,7 +47,7 @@ class Rpg(threading.Thread):
                 elif res.strip() != "":
                     if debug:
                         print res
-                    #user, message, msg_type = parse_msg(res, self.pub_reg, self.priv_reg, self.bot_name, self.channel)
+                    # user, message, msg_type = parse_msg(res, self.pub_reg, self.priv_reg, self.bot_name, self.channel)
                     user, user_account, ip, msg_type, message, target = new_parsing(res)
                     if message.startswith("!join"):
                         param = message.split(" ")

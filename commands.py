@@ -11,13 +11,15 @@ color = 2
 transferrer_list = []
 rpg_list = []
 
-def print_message(message,msg_type="STDIN",sock=None,pseudo=None):
-    if msg_type=="PRIVMSG":
-        send_private_message(message,pseudo,sock)
-    elif msg_type=="PUBMSG":
-        send_public_message(message,sock)
+
+def print_message(message, msg_type="STDIN", sock=None, pseudo=None):
+    if msg_type == "PRIVMSG":
+        send_private_message(message, pseudo, sock)
+    elif msg_type == "PUBMSG":
+        send_public_message(message, sock)
     elif msg_type == "STDIN":
         print message
+
 
 def send_ticket_to_ghozt(pseudo, message, msg_type, sock):
     if msg_type == "PUBMSG":
@@ -75,7 +77,7 @@ def transferrer_public(pseudo, param, sock):
             channel = param[2]
             if check_valid_sever(server_addr, channel, port):
                 send_public_message("sorry you choose this channel, I can't agree it will create a loophole!!!", sock)
-            elif check_not_already_use_transferer(server_addr, channel, port,pseudo):
+            elif check_not_already_use_transferer(server_addr, channel, port, pseudo):
                 send_public_message("Transferer already exist", sock)
             else:
                 external_bot_name = "user_" + str(num_genrator.randint(1000, 1000 * 1000))
@@ -205,8 +207,8 @@ def transferrer_private(pseudo, param, sock):
 def check_not_already_use_transferer(server_addr, channel, external_port, target=None):
     for tr in transferrer_list:
         if debug:
-            print "[D]",server_addr, channel, external_port, tr.addr, tr.channel, tr.port,tr.pseudo,target
-            print "[D]",tr.pseudo == target
+            print "[D]", server_addr, channel, external_port, tr.addr, tr.channel, tr.port, tr.pseudo, target
+            print "[D]", tr.pseudo == target
         if check_valid_sever(server_addr, channel, external_port, tr.addr, tr.channel, tr.port) and tr.pseudo == target:
             return 1
 

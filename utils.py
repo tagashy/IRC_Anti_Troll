@@ -1,6 +1,8 @@
-from socket import *
-from config import *
 import re
+from socket import *
+
+from config import *
+
 
 def create_irc_socket(addr, bot_name, channel, port=6667):
     name_list_reg = re.compile("(?<= 353 " + bot_name + " = " + channel + " :).*")
@@ -32,7 +34,7 @@ def create_irc_socket(addr, bot_name, channel, port=6667):
                 print "[!] creation of user list"
                 users += parse_name_list(res, name_list_reg)
                 if debug:
-                    print_message("[D] users of channel {}:{}".format(channel,users))
+                    print_message("[D] users of channel {}:{}".format(channel, users))
     except:
         recv_sock.settimeout(None)
         recv_sock.send("JOIN " + channel + "\r\n")
@@ -63,3 +65,11 @@ def parse_name_list(msg, name_list_reg):
         name_list = name_list_res.group(0)
         names = name_list.split()
         return names
+
+
+def cut_at_cara(string, c):
+    index = string.find(c)
+    if index != -1:
+        return string[index + 1:]
+    else:
+        return string
