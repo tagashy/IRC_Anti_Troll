@@ -1,35 +1,17 @@
-import commands
 from config import *
 
 
 class Command:
-    def __init__(self, keyword, function, name, helpable=True):
+    def __init__(self, keyword, function, name, helpable=True,match=False):
         self.keyword = keyword
         self.function = function
         self.name = name
         self.help = helpable
-
-
-def commands_init():
-    cmds = []
-    cmd = Command("!die", commands.DIE, "DIE")
-    cmds.append(cmd)
-    cmd = Command(["!transfert", "!transfert?"], commands.transfert_message_from_other_place, "Tranfert")
-    cmds.append(cmd)
-    cmd = Command(["!kill_transfert", "!kill_transfert?"], commands.suppress_transferrer, "Kill_Tranfert")
-    cmds.append(cmd)
-    cmd = Command(["!rpg", "!rpg?"], commands.start_rpg, "Rpg")
-    cmds.append(cmd)
-    cmd = Command(["!kill_rpg", "!kill_rpg?"], commands.stop_rpg, "Kill_Rpg")
-    cmds.append(cmd)
-    return cmds
-
+        self.match=match
 
 def command_loop(pseudo, message, msg_type, sock, cmds):
     if "!help" == message:
         help_cmd(cmds, sock)
-    elif "help" in message or "aide" in message:
-        commands.send_ticket_to_ghozt(pseudo, message, msg_type, sock)
     for cmd in cmds:
         if isinstance(cmd.keyword, str):
             if message == cmd.keyword:
@@ -38,6 +20,9 @@ def command_loop(pseudo, message, msg_type, sock, cmds):
         else:
             for key in cmd.keyword:
                 if message.startswith(key + " ") or message == key:
+                    print "[!] function " + cmd.name + " called by " + pseudo
+                    cmd.function(pseudo, message, msg_type, sock)
+                elif cmd.match and key in message:
                     print "[!] function " + cmd.name + " called by " + pseudo
                     cmd.function(pseudo, message, msg_type, sock)
 

@@ -27,7 +27,6 @@ class Transferrer(threading.Thread):
 
     def run(self):
         self.users, self.recv_sock = utils.create_irc_socket(self.addr, self.bot_name, self.channel, self.port)
-        pub_reg, priv_reg = init_parsing_channel(self.bot_name, self.channel)
         print "[!] Initialisation of tranfert done"
         self.recv_sock.settimeout(2)
         while 1:

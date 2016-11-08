@@ -32,7 +32,6 @@ class Rpg(threading.Thread):
     def run(self):
         self.comands_init()
         users, self.sock = utils.create_irc_socket(self.addr, self.bot_name, self.channel, self.port)
-        self.pub_reg, self.priv_reg = init_parsing_channel(self.bot_name, self.channel)
         self.send_public_message("RPG Game about to start please register by !join")
         start = False
         while not start:
@@ -47,7 +46,6 @@ class Rpg(threading.Thread):
                 elif res.strip() != "":
                     if debug:
                         print res
-                    # user, message, msg_type = parse_msg(res, self.pub_reg, self.priv_reg, self.bot_name, self.channel)
                     user, user_account, ip, msg_type, message, target = new_parsing(res)
                     if message.startswith("!join"):
                         param = message.split(" ")
@@ -83,7 +81,6 @@ class Rpg(threading.Thread):
                 elif res.strip() != "":
                     if debug:
                         print res
-                    # user, message, msg_type = parse_msg(res, self.pub_reg, self.priv_reg, self.bot_name, self.channel)
                     user, user_account, ip, msg_type, message, target = new_parsing(res)
                     self.command_choice(message, user)
 
@@ -211,8 +208,6 @@ class Rpg(threading.Thread):
         self.sock.send("PRIVMSG " + pseudo + " :" + message + "\r\n")
 
 
-# rpg = Rpg("irc.root-me.org", "RPG_master", "#test")
-# rpg.start()
 
 
 class Player:

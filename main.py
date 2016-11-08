@@ -1,13 +1,8 @@
-from socket import *
-import thread
-import time
-import message_parsing
-from config import *
-from commands import *
-from command_class import *
-import utils
 import threading
-
+import message_parsing
+import utils
+from command_class import *
+import commands
 
 class bot(threading.Thread):
     def __init__(self, server, bot_name, channel, port):
@@ -15,7 +10,6 @@ class bot(threading.Thread):
         self._stop = threading.Event()
         self.cmds = commands_init()
         self.users, self.sock = utils.create_irc_socket(server, bot_name, channel, port)
-        self.public_content_reg, self.private_content_reg = init_parsing_channel(bot_name, channel)
         self.name = bot_name
         self.channel = channel
         self.server = server
@@ -46,13 +40,26 @@ class bot(threading.Thread):
                     self.sock.send(line.replace("PING", "PONG") + "\r\n")
                 elif line.strip() != "":
                     print line
-                    # pseudo, message, msg_type = message_parsing.parse_msg(res, self.public_content_reg,self.private_content_reg, self.name,self.channel)
-                    # full_username,\
                     pseudo, user_account, ip, msg_type, content, target = message_parsing.new_parsing(line)
-                    # command_loop(pseudo, message, msg_type, self.sock, self.cmds)
                     command_loop(pseudo, content, msg_type, self.sock, self.cmds)
                     if content != "NONE":
                         print "[" + msg_type + "]", "USER:", pseudo, "send:", content
+
+def commands_init():
+    cmds = []
+    cmd = Command("!die", commands.DIE, "DIE")
+    cmds.append(cmd)
+    cmd = Command(["!transfert", "!transfert?"], commands.transfert_message_from_other_place, "Tranfert")
+    cmds.append(cmd)
+    cmd = Command(["!kill_transfert", "!kill_transfert?"], commands.suppress_transferrer, "Kill_Tranfert")
+    cmds.append(cmd)
+    cmd = Command(["!rpg", "!rpg?"], commands.start_rpg, "Rpg")
+    cmds.append(cmd)
+    cmd = Command(["!kill_rpg", "!kill_rpg?"], commands.stop_rpg, "Kill_Rpg")
+    cmds.append(cmd)
+    cmd= Command([" help "," aide "],commands.send_ticket_to_ghozt,"TICKET_TO_GHOZT",match=True)
+    cmds.append(cmd)
+    return cmds
 
 
 TagaBot = bot(main_server, bot_name, main_channel, main_port)
