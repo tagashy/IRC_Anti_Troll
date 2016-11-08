@@ -263,9 +263,9 @@ def check_valid_sever(server_addr, channel, external_port, comp_serv=main_server
 
 def suppress_transferrer(pseudo, message, msg_type, sock):
     param = message.split()
-    if msg_type == "Public_Message":
+    if msg_type == "PUBMSG":
         suppress_transferrer_public(param, sock)
-    elif msg_type == "Private_Message":
+    elif msg_type == "PRIVMSG":
         suppress_transferrer_public(pseudo, param, sock)
 
 

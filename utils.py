@@ -41,9 +41,9 @@ def create_irc_socket(addr, bot_name, channel, port=6667):
 
 
 def print_message(message, msg_type="STDIN", sock=None, pseudo=None):
-    if msg_type == "Private_Message":
+    if msg_type == "PRIVMSG":
         send_private_message(message, pseudo, sock)
-    elif msg_type == "Public_Message":
+    elif msg_type == "PUBMSG":
         send_public_message(message, sock)
     elif msg_type == "STDIN":
         print message

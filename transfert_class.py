@@ -42,15 +42,15 @@ class Transferrer(threading.Thread):
                     if debug:
                         print res
                     # user, message, msg_type = parse_msg(res, pub_reg, priv_reg, self.bot_name,self.channel)
-                    full_username, user, user_account, ip, msg_type, message, target = new_parsing(res)
+                    user, user_account, ip, msg_type, message, target = new_parsing(res)
                     # command_loop(pseudo, message, msg_type, self.sock, self.cmds)
                     if self.pseudo is not None:
-                        if msg_type == "Public_Message":
+                        if msg_type == "PUBMSG":
                             send_private_message(
                                 chr(3) + str(
                                     self.couleur) + self.channel + " : " + user + ">" + message,
                                 self.pseudo, self.send_sock)
-                        elif msg_type == "Private_Message":
+                        elif msg_type == "PRIVMSG":
                             send_private_message(
                                 chr(3) + str(self.couleur) + "Private message from user " + user + ">" + message,
                                 self.pseudo,
@@ -73,12 +73,12 @@ class Transferrer(threading.Thread):
                                 self.pseudo,
                                 self.send_sock)
                     else:
-                        if msg_type == "Public_Message":
+                        if msg_type == "PUBMSG":
                             send_public_message(
                                 chr(3) + str(
                                     self.couleur) + self.channel + " : " + user + ">" + message,
                                 self.send_sock)
-                        elif msg_type == "Private_Message":
+                        elif msg_type == "PRIVMSG":
                             send_public_message(
                                 chr(3) + str(self.couleur) + "Private message from user " + user + ">" + message,
                                 self.send_sock)

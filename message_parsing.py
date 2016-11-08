@@ -8,7 +8,8 @@ join_reg = re.compile("(?<= JOIN :).*")
 quit_reg = re.compile("(?<= QUIT :).*")
 part_reg = re.compile("(?<= PART ).*")
 message_regex = re.compile(
-    r"^(?::(([^@!\ ]*)(?:(?:!([^@]*))?@([^\ ]*))?)\ )?([^\ ]+)((?:\ [^:\ ][^\\]*){0,14})(?:\ :?(.*))?$", re.VERBOSE)
+    r"^:([\w\[\]\\`_\^\{\|\}][\w\d\[\]\\`_\^\{\|\}\-]{1,})!([^\r\n@ ]+)@([\w\d\-\./]+)\s([\w]*)\s:?([&\#][^\s,\x07]{2,200})\s?:?(.*)$",
+    re.VERBOSE)
 
 
 # pub_content_reg = re.compile("(?<= PRIVMSG " + channel + " :).*")
@@ -45,48 +46,39 @@ def init_parsing_channel(bot_name, channel):
 
 def new_parsing(msg):
     msg = msg.replace("\r", "").replace("\n", "").replace("\b", "")
-    full_username = pseudo = user_account = ip = msg_type = content = target = ""
+    pseudo = user_account = ip = msg_type = content = target = ""
     msg_parsed = message_regex.search(msg)
     if msg_parsed:
         data = msg_parsed.groups()
-        if len(data) == 6:
-            full_username = data[0]
-            pseudo = data[1]
-            user_account = data[2]
-            ip = data[3]
-            msg_type = data[4]
+        if len(data) >= 6:
+            pseudo = data[0]
+            user_account = data[1]
+            ip = data[2]
+            msg_type = data[3]
+            target = data[4]
             content = data[5]
-            target = content.split(":")[0].replace(" ", "")
-        elif len(data) == 7:
-            full_username = data[0]
-            pseudo = data[1]
-            user_account = data[2]
-            ip = data[3]
-            msg_type = data[4]
-            content = data[5]
-            target = content.split(":")[0].replace(" ", "")
-        if content.startswith(" JOIN :"):
-            full_username = msg_type[1:]
-            msg_type = "JOIN"
-            pseudo = full_username.split("!")[0]
-            user_account = cut_at_cara(full_username, "!").split("@")[0]
-            ip = cut_at_cara(full_username, "@")
-            target = content.split(" JOIN :")[1]
-        content = cut_at_cara(content, ":")
-        if target.startswith("#"):
+            # if content.startswith(" JOIN :"):
+            #   full_username = msg_type[1:]
+            #  msg_type = "JOIN"
+            # pseudo = full_username.split("!")[0]
+            # user_account = cut_at_cara(full_username, "!").split("@")[0]
+            # ip = cut_at_cara(full_username, "@")
+            # target = content.split(" JOIN :")[1]
+        # content = cut_at_cara(content, ":")
+        if target.startswith("#") and msg_type == "PRIVMSG":
             msg_type = "PUBMSG"
         if debug:
             print_message(
-                "[D] full username: '{}' pseudo: '{}' user acount: '{}' ip: '{}' msg type: '{}' content: '{}' target: '{}'".format(
-                    full_username, pseudo, user_account, ip, msg_type, content, target))
-
-    return full_username, pseudo, user_account, ip, msg_type, content, target
+                "[D] pseudo: '{}' user acount: '{}' ip: '{}' msg type: '{}' content: '{}' target: '{}'".format(
+                    # full_username, pseudo, user_account, ip, msg_type, content, target))
+                    pseudo, user_account, ip, msg_type, content, target))
+    return pseudo, user_account, ip, msg_type, content, target
 
 
 def cut_at_cara(string, c):
-    index=string.find(c)
-    if index !=-1:
-        return string[index+1:]
+    index = string.find(c)
+    if index != -1:
+        return string[index + 1:]
     else:
         return string
 

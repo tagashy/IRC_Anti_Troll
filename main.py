@@ -41,16 +41,18 @@ class bot(threading.Thread):
             if self.stopped():
                 self.end()
             res = self.sock.recv(1024)
-            if "PING" in res.split(" ")[0]:
-                self.sock.send(res.replace("PING", "PONG"))
-            elif res.strip() != "":
-                print res
-                # pseudo, message, msg_type = message_parsing.parse_msg(res, self.public_content_reg,self.private_content_reg, self.name,self.channel)
-                full_username, pseudo, user_account, ip, msg_type, content, target = message_parsing.new_parsing(res)
-                # command_loop(pseudo, message, msg_type, self.sock, self.cmds)
-                command_loop(pseudo, content, msg_type, self.sock, self.cmds)
-                if content != "NONE":
-                    print "[" + msg_type + "]", "USER:", pseudo, "send:", content
+            for line in res.split("\r\n"):
+                if "PING" in line:
+                    self.sock.send(line.replace("PING", "PONG")+"\r\n")
+                elif line.strip() != "":
+                    print line
+                    # pseudo, message, msg_type = message_parsing.parse_msg(res, self.public_content_reg,self.private_content_reg, self.name,self.channel)
+                    #full_username,\
+                    pseudo, user_account, ip, msg_type, content, target = message_parsing.new_parsing(line)
+                    # command_loop(pseudo, message, msg_type, self.sock, self.cmds)
+                    command_loop(pseudo, content, msg_type, self.sock, self.cmds)
+                    if content != "NONE":
+                        print "[" + msg_type + "]", "USER:", pseudo, "send:", content
 
 
 def recv_loop(sock, bot_name, channel):

@@ -49,7 +49,7 @@ class Rpg(threading.Thread):
                     if debug:
                         print res
                     #user, message, msg_type = parse_msg(res, self.pub_reg, self.priv_reg, self.bot_name, self.channel)
-                    full_username, user, user_account, ip, msg_type, message, target = new_parsing(res, self.name)
+                    user, user_account, ip, msg_type, message, target = new_parsing(res)
                     if message.startswith("!join"):
                         param = message.split(" ")
                         if len(param) == 1:
@@ -85,7 +85,7 @@ class Rpg(threading.Thread):
                     if debug:
                         print res
                     # user, message, msg_type = parse_msg(res, self.pub_reg, self.priv_reg, self.bot_name, self.channel)
-                    full_username, user, user_account, ip, msg_type, message, target = new_parsing(res)
+                    user, user_account, ip, msg_type, message, target = new_parsing(res)
                     self.command_choice(message, user)
 
             except:
