@@ -17,14 +17,17 @@ def command_loop(pseudo, message, msg_type, sock, cmds):
             if message == cmd.keyword:
                 print "[!] function " + cmd.name + " called by " + pseudo
                 cmd.function(pseudo, message, msg_type, sock)
+                return 1
         else:
             for key in cmd.keyword:
                 if message.startswith(key + " ") or message == key:
                     print "[!] function " + cmd.name + " called by " + pseudo
                     cmd.function(pseudo, message, msg_type, sock)
+                    return 1
                 elif cmd.match and key in message:
                     print "[!] function " + cmd.name + " called by " + pseudo
                     cmd.function(pseudo, message, msg_type, sock)
+                    return 1
 
 
 def help_cmd(cmds, sock):

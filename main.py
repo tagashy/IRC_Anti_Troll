@@ -1,8 +1,10 @@
 import threading
+
+import commands
 import message_parsing
 import utils
 from command_class import *
-import commands
+
 
 class bot(threading.Thread):
     def __init__(self, server, bot_name, channel, port):
@@ -45,6 +47,7 @@ class bot(threading.Thread):
                     if content != "NONE":
                         print "[" + msg_type + "]", "USER:", pseudo, "send:", content
 
+
 def commands_init():
     cmds = []
     cmd = Command("!die", commands.DIE, "DIE")
@@ -57,10 +60,29 @@ def commands_init():
     cmds.append(cmd)
     cmd = Command(["!kill_rpg", "!kill_rpg?"], commands.stop_rpg, "Kill_Rpg")
     cmds.append(cmd)
-    cmd= Command([" help "," aide "],commands.send_ticket_to_ghozt,"TICKET_TO_GHOZT",match=True)
+    cmd = Command([" help ", " aide "], commands.send_ticket_to_ghozt, "TICKET_TO_GHOZT", match=True)
     cmds.append(cmd)
     return cmds
 
 
+def STD_Input():
+    #global TagaBot
+    sock = TagaBot.sock
+    cmds=[]
+    cmd=Command(["!migrate","!migrate?"],commands.migration,"Migrate")
+    cmds.append(cmd)
+
+    while 1:
+        data = raw_input()
+        if command_loop("STDIN",data,"STDIN",sock,cmds):
+            print "[!] EXECUTED VIA STDIN"
+        else:
+            try:
+                exec data
+            except:
+                sock.send(data)
+
+
 TagaBot = bot(main_server, bot_name, main_channel, main_port)
 TagaBot.start()
+STD_Input()

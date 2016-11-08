@@ -418,18 +418,19 @@ def stop_rpg(pseudo, message, msg_type, sock):
 
 
 def migration(pseudo, message, msg_type, sock, entry="IRC"):
-    global channel
+    global main_channel
     param = message.split()
     if len(param) == 1:
         if "?" in param[0]:
-            if entry == "IRC":
-                send_private_message("!migrate channel (server)", pseudo, sock)
-            elif entry == "STDIN":
+            if msg_type == "STDIN":
                 print "!migrate channel (server)"
+            else:
+                send_private_message("!migrate channel (server)", pseudo, sock)
+
     elif len(param) == 2:
-        sock.send("JOIN " + param[2])
-        sock.send("PART " + channel)
-        channel = param[2]
+        sock.send("JOIN " + param[1]+"\r\n")
+        sock.send("PART " + main_channel+"\r\n")
+        main_channel = param[1]
 
 
 from transfert_class import Transferrer
