@@ -4,7 +4,7 @@ from config import *
 from utils import print_message
 
 message_regex = re.compile(
-    r"^:([\w\[\]\\`_\^\{\|\}][\w\d\[\]\\`_\^\{\|\}\-]{1,})!([^\r\n@ ]+)@([\w\d\-\./]+)\s([\w]*)\s:?([&\#][^\s,\x07]{2,200})\s?:?(.*)$",
+    r"^:([\w\[\]\\`_\^\{\|\}][\w\d\[\]\\`_\^\{\|\}\-]{1,})!([^\r\n@ ]+)@([\w\d\-\./]+)\s([\w]*)\s:?([&\#\w][^\s,\x07]{2,200})\s?:?(.*)$",
     re.VERBOSE)
 
 
@@ -23,7 +23,7 @@ def new_parsing(msg):
             content = data[5]
         if target.startswith("#") and msg_type == "PRIVMSG":
             msg_type = "PUBMSG"
-        if debug:
+        if config.debug:
             print_message(
                 "[D] pseudo: '{}' user acount: '{}' ip: '{}' msg type: '{}' content: '{}' target: '{}'".format(
                     pseudo, user_account, ip, msg_type, content, target))

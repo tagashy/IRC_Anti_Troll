@@ -18,6 +18,7 @@ class Transferrer(threading.Thread):
         self.recv_sock = None
         self.couleur = couleur
         self.users = None
+        self.started = False
 
     def stop(self):
         self._stop.set()
@@ -25,10 +26,17 @@ class Transferrer(threading.Thread):
     def stopped(self):
         return self._stop.isSet()
 
+    def send_message(self, message):
+        if self.pseudo is not None:
+            self.send_message(message, self.pseudo, self.send_sock)
+        else:
+            send_public_message(message, self.send_sock)
+
     def run(self):
         self.users, self.recv_sock = utils.create_irc_socket(self.addr, self.bot_name, self.channel, self.port)
         print "[!] Initialisation of tranfert done"
         self.recv_sock.settimeout(2)
+        self.started = True
         while 1:
             if self.stopped():
                 self.recv_sock.send("QUIT : s'enfuis\r\n")
@@ -39,65 +47,30 @@ class Transferrer(threading.Thread):
                 if "PING" in res.split(" ")[0]:
                     self.recv_sock.send(res.replace("PING", "PONG"))
                 elif res.strip() != "":
-                    if debug:
+                    if config.debug:
                         print res
-                    # user, message, msg_type = parse_msg(res, pub_reg, priv_reg, self.bot_name,self.channel)
                     user, user_account, ip, msg_type, message, target = new_parsing(res)
-                    # command_loop(pseudo, message, msg_type, self.sock, self.cmds)
-                    if self.pseudo is not None:
-                        if msg_type == "PUBMSG":
-                            send_private_message(
-                                chr(3) + str(
-                                    self.couleur) + self.channel + " : " + user + ">" + message,
-                                self.pseudo, self.send_sock)
-                        elif msg_type == "PRIVMSG":
-                            send_private_message(
-                                chr(3) + str(self.couleur) + "Private message from user " + user + ">" + message,
-                                self.pseudo,
-                                self.send_sock)
-                        elif msg_type == "JOIN":
-                            self.users.append(user)
-                            send_private_message(
-                                chr(3) + str(self.couleur) + "User " + user + " has join channel", self.pseudo,
-                                self.send_sock)
-                        elif msg_type == "QUIT":
-                            self.users.remove(user)
-                            send_private_message(
-                                chr(3) + str(self.couleur) + "User " + user + " has quit server with msg : " + message,
-                                self.pseudo,
-                                self.send_sock)
-                        elif msg_type == "PART":
-                            self.users.remove(user)
-                            send_private_message(
-                                chr(3) + str(self.couleur) + "User " + user + " has quit channel with msg : " + message,
-                                self.pseudo,
-                                self.send_sock)
-                    else:
-                        if msg_type == "PUBMSG":
-                            send_public_message(
-                                chr(3) + str(
-                                    self.couleur) + self.channel + " : " + user + ">" + message,
-                                self.send_sock)
-                        elif msg_type == "PRIVMSG":
-                            send_public_message(
-                                chr(3) + str(self.couleur) + "Private message from user " + user + ">" + message,
-                                self.send_sock)
-                        elif msg_type == "JOIN":
-                            self.users.append(user)
-                            send_private_message(
-                                chr(3) + str(self.couleur) + "User " + user + " has join channel", self.pseudo,
-                                self.send_sock)
-                        elif msg_type == "QUIT":
-                            self.users.remove(user)
-                            send_private_message(
-                                chr(3) + str(self.couleur) + "User " + user + " has quit server with msg : " + message,
-                                self.pseudo,
-                                self.send_sock)
-                        elif msg_type == "PART":
-                            self.users.remove(user)
-                            send_private_message(
-                                chr(3) + str(self.couleur) + "User " + user + " has quit channel with msg : " + message,
-                                self.pseudo,
-                                self.send_sock)
+                    if msg_type == "PUBMSG":
+
+                        self.send_message(
+                            chr(3) + str(
+                                self.couleur) + self.channel + " : " + user + ">" + message,
+                        )
+                    elif msg_type == "PRIVMSG":
+                        self.send_message(
+                            chr(3) + str(self.couleur) + "Private message from user " + user + ">" + message)
+                    elif msg_type == "JOIN":
+                        self.users.append(user)
+                        self.send_message(
+                            chr(3) + str(self.couleur) + "User " + user + " has join channel")
+                    elif msg_type == "QUIT":
+                        self.users.remove(user)
+                        self.send_message(
+                            chr(3) + str(self.couleur) + "User " + user + " has quit server with msg : " + message)
+                    elif msg_type == "PART":
+                        self.users.remove(user)
+                        self.send_message(
+                            chr(3) + str(self.couleur) + "User " + user + " has quit channel with msg : " + message)
+
             except:
                 pass

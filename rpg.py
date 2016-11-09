@@ -44,7 +44,7 @@ class Rpg(threading.Thread):
                 if "PING" in res.split(" ")[0]:
                     self.sock.send(res.replace("PING", "PONG"))
                 elif res.strip() != "":
-                    if debug:
+                    if config.debug:
                         print res
                     user, user_account, ip, msg_type, message, target = new_parsing(res)
                     if message.startswith("!join"):
@@ -79,7 +79,7 @@ class Rpg(threading.Thread):
                 if "PING" in res.split(" ")[0]:
                     self.sock.send(res.replace("PING", "PONG"))
                 elif res.strip() != "":
-                    if debug:
+                    if config.debug:
                         print res
                     user, user_account, ip, msg_type, message, target = new_parsing(res)
                     self.command_choice(message, user)
@@ -92,13 +92,13 @@ class Rpg(threading.Thread):
         for cmd in self.cmds:
             if isinstance(cmd.keyword, str):
                 if message == cmd.keyword:
-                    if debug:
+                    if config.debug:
                         print "[!] function " + cmd.name + " called by " + user
                     cmd.function(param, user)
             else:
                 for key in cmd.keyword:
                     if message.startswith(key + " ") or message == key:
-                        if debug:
+                        if config.debug:
                             print "[!] function " + cmd.name + " called by " + user
                         cmd.function(param, user)
 

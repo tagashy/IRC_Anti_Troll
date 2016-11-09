@@ -41,7 +41,8 @@ class bot(threading.Thread):
                 if "PING" in line:
                     self.sock.send(line.replace("PING", "PONG") + "\r\n")
                 elif line.strip() != "":
-                    print line
+                    if config.debug:
+                        print line
                     pseudo, user_account, ip, msg_type, content, target = message_parsing.new_parsing(line)
                     command_loop(pseudo, content, msg_type, self.sock, self.cmds)
                     if content != "NONE":
@@ -54,13 +55,15 @@ def commands_init():
     cmds.append(cmd)
     cmd = Command(["!transfert", "!transfert?"], commands.transfert_message_from_other_place, "Tranfert")
     cmds.append(cmd)
-    cmd = Command(["!kill_transfert", "!kill_transfert?"], commands.suppress_transferrer, "Kill_Tranfert")
+    cmd = Command("!list_transfert", commands.list_transferer, "List Tranfert")
+    cmds.append(cmd)
+    cmd = Command(["!kill_transfert", "!kill_transfert?"], commands.suppress_transferrer, "Kill Tranfert")
     cmds.append(cmd)
     cmd = Command(["!rpg", "!rpg?"], commands.start_rpg, "Rpg")
     cmds.append(cmd)
-    cmd = Command(["!kill_rpg", "!kill_rpg?"], commands.stop_rpg, "Kill_Rpg")
+    cmd = Command(["!kill_rpg", "!kill_rpg?"], commands.stop_rpg, "Kill Rpg")
     cmds.append(cmd)
-    cmd = Command([" help ", " aide "], commands.send_ticket_to_ghozt, "TICKET_TO_GHOZT", match=True)
+    cmd = Command([" help ", " aide "], commands.send_ticket_to_ghozt, "TICKET TO GHOZT", match=True,helpable=False)
     cmds.append(cmd)
     return cmds
 
@@ -83,6 +86,6 @@ def STD_Input():
                 sock.send(data)
 
 
-TagaBot = bot(main_server, bot_name, main_channel, main_port)
+TagaBot = bot(config.main_server, config.bot_name, config.main_channel, config.main_port)
 TagaBot.start()
 STD_Input()

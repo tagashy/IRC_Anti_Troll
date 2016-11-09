@@ -1,12 +1,11 @@
 import re
 from socket import *
-
 from config import *
 
 
 def create_irc_socket(addr, bot_name, channel, port=6667):
     name_list_reg = re.compile("(?<= 353 " + bot_name + " = " + channel + " :).*")
-    if debug:
+    if config.debug:
         print_message("(?<= 353 " + bot_name + " = " + channel + " :).*")
     users = []
     recv_sock = socket(AF_INET, SOCK_STREAM)
@@ -18,7 +17,7 @@ def create_irc_socket(addr, bot_name, channel, port=6667):
     try:
         while 1:
             res = recv_sock.recv(1024)
-            if debug:
+            if config.debug:
                 print res
             if "[Throttled]" in res:
                 print "[W] Unable to register because of throttled connection"
@@ -33,7 +32,7 @@ def create_irc_socket(addr, bot_name, channel, port=6667):
             if "353" in res:
                 print "[!] creation of user list"
                 users += parse_name_list(res, name_list_reg)
-                if debug:
+                if config.debug:
                     print_message("[D] users of channel {}:{}".format(channel, users))
     except:
         recv_sock.settimeout(None)
@@ -52,7 +51,7 @@ def print_message(message, msg_type="STDIN", sock=None, pseudo=None):
 
 
 def send_public_message(message, sock):
-    sock.send("PRIVMSG " + main_channel + " :" + message + "\r\n")
+    sock.send("PRIVMSG " + config.main_channel + " :" + message + "\r\n")
 
 
 def send_private_message(message, pseudo, sock):
