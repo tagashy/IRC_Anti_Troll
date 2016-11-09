@@ -21,13 +21,13 @@ def create_irc_socket(addr, bot_name, channel, port=6667):
                 print res
             if "[Throttled]" in res:
                 print "[W] Unable to register because of throttled connection"
-                exit(0)
+                return -1,-1
             elif "[Registration timeout]" in res:
                 print "[W] Unable to register because of Registration Timeout"
-                exit(0)
+                return -1,-1
             elif "ERROR :Closing link:" in res:
                 print "[W] Unable to register because host close the link"
-                exit(0)
+                return -1,-1
 
             if "353" in res:
                 print "[!] creation of user list"

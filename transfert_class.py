@@ -28,12 +28,14 @@ class Transferrer(threading.Thread):
 
     def send_message(self, message):
         if self.pseudo is not None:
-            self.send_message(message, self.pseudo, self.send_sock)
+            send_private_message(message, self.pseudo, self.send_sock)
         else:
             send_public_message(message, self.send_sock)
 
     def run(self):
         self.users, self.recv_sock = utils.create_irc_socket(self.addr, self.bot_name, self.channel, self.port)
+        if self.recv_sock == -1:
+            exit(-1)
         print "[!] Initialisation of tranfert done"
         self.recv_sock.settimeout(2)
         self.started = True
@@ -58,19 +60,23 @@ class Transferrer(threading.Thread):
                         )
                     elif msg_type == "PRIVMSG":
                         self.send_message(
-                            chr(3) + str(self.couleur) + "Private message from user " + user + ">" + message)
+                            chr(3) + str(self.couleur) + "Private message from user " + user[0:1] + u"\u2009" + user[
+                                                                                                                1:] + ">" + message)
                     elif msg_type == "JOIN":
                         self.users.append(user)
                         self.send_message(
-                            chr(3) + str(self.couleur) + "User " + user + " has join channel")
+                            chr(3) + str(self.couleur) + "User " + user[0:1] + u"\u2009" + user[
+                                                                                           1:] + " has join channel")
                     elif msg_type == "QUIT":
                         self.users.remove(user)
                         self.send_message(
-                            chr(3) + str(self.couleur) + "User " + user + " has quit server with msg : " + message)
+                            chr(3) + str(self.couleur) + "User " + user[0:1] + u"\u2009" + user[
+                                                                                           1:] + " has quit server with msg : " + message)
                     elif msg_type == "PART":
                         self.users.remove(user)
                         self.send_message(
-                            chr(3) + str(self.couleur) + "User " + user + " has quit channel with msg : " + message)
+                            chr(3) + str(self.couleur) + "User " + user[0:1] + u"\u2009" + user[
+                                                                                           1:] + " has quit channel with msg : " + message)
 
             except:
                 pass

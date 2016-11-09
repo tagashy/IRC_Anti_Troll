@@ -32,6 +32,8 @@ class Rpg(threading.Thread):
     def run(self):
         self.comands_init()
         users, self.sock = utils.create_irc_socket(self.addr, self.bot_name, self.channel, self.port)
+        if self.sock == -1:
+            exit(-1)
         self.send_public_message("RPG Game about to start please register by !join")
         start = False
         while not start:

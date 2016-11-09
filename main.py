@@ -12,6 +12,8 @@ class bot(threading.Thread):
         self._stop = threading.Event()
         self.cmds = commands_init()
         self.users, self.sock = utils.create_irc_socket(server, bot_name, channel, port)
+        if self.sock == -1:
+            exit(-1)
         self.name = bot_name
         self.channel = channel
         self.server = server
