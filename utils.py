@@ -1,7 +1,9 @@
 import re
 from socket import *
-from config import *
-
+from config import config
+if config.log:
+    import logging
+    log=logging.Log()
 
 def create_irc_socket(addr, bot_name, channel, port=6667):
     name_list_reg = re.compile("(?<= 353 " + bot_name + " = " + channel + " :).*")
@@ -12,7 +14,8 @@ def create_irc_socket(addr, bot_name, channel, port=6667):
     recv_sock.connect((addr, port))
     recv_sock.send("USER " + bot_name + " Bot Bot Bot\r\n")
     recv_sock.send("NICK " + bot_name + "\r\n")
-    print "[!] Authentification to " + addr + " send"
+    res=""
+    print_message("[!] Authentification to " + addr + " send")
     recv_sock.settimeout(2)
     try:
         while 1:
@@ -20,24 +23,30 @@ def create_irc_socket(addr, bot_name, channel, port=6667):
             if config.debug:
                 print res
             if "[Throttled]" in res:
-                print "[W] Unable to register because of throttled connection"
+                print_message("[W] Unable to register because of throttled connection")
                 return -1,-1
             elif "[Registration timeout]" in res:
-                print "[W] Unable to register because of Registration Timeout"
-                return -1,-1
+                print_message("[W] Unable to register because of Registration Timeout")
+                return -1,-2
             elif "ERROR :Closing link:" in res:
-                print "[W] Unable to register because host close the link"
-                return -1,-1
+                print_message("[W] Unable to register because host close the link")
+                return -1,-3
 
-            if "353" in res:
-                print "[!] creation of user list"
-                users += parse_name_list(res, name_list_reg)
-                if config.debug:
-                    print_message("[D] users of channel {}:{}".format(channel, users))
-    except:
-        recv_sock.settimeout(None)
+
+    except timeout:
         recv_sock.send("JOIN " + channel + "\r\n")
+        recv_sock.settimeout(None)
         print "[!] Join " + channel + " send"
+
+    while " 366 " not in res:
+        res = recv_sock.recv(1024)
+        if config.debug:
+            print res
+        if " 353 " in res:
+            print_message("[!] creation of user list")
+            users += parse_name_list(res, name_list_reg)
+            if config.debug:
+                print_message("[D] users of channel {}:{}".format(channel, users))
     return users, recv_sock
 
 
@@ -48,6 +57,9 @@ def print_message(message, msg_type="STDIN", sock=None, pseudo=None):
         send_public_message(message, sock)
     elif msg_type == "STDIN":
         print message
+    if config.log:
+        log.write(message)
+
 
 
 def send_public_message(message, sock):

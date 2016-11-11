@@ -1,5 +1,6 @@
 import random
 import threading
+from socket import timeout
 
 import utils
 from command_class import Command
@@ -15,7 +16,7 @@ class Rpg(threading.Thread):
         self._stop = threading.Event()
         self.players = []
         self.addr = addr
-        self.bot_name = bot_name
+        self.name = bot_name
         self.channel = channel
         self.port = port
         self.sock = None
@@ -31,7 +32,7 @@ class Rpg(threading.Thread):
 
     def run(self):
         self.comands_init()
-        users, self.sock = utils.create_irc_socket(self.addr, self.bot_name, self.channel, self.port)
+        users, self.sock = utils.create_irc_socket(self.addr, self.name, self.channel, self.port)
         if self.sock == -1:
             exit(-1)
         self.send_public_message("RPG Game about to start please register by !join")
@@ -55,7 +56,7 @@ class Rpg(threading.Thread):
                             self.players.append(Player(user, 100, 100))
                     if message.startswith("!start"):
                         start = True
-            except:
+            except timeout:
                 pass
         self.send_public_message("Game has start !!!")
         for player in self.players:
@@ -208,8 +209,6 @@ class Rpg(threading.Thread):
 
     def send_private_message(self, message, pseudo):
         self.sock.send("PRIVMSG " + pseudo + " :" + message + "\r\n")
-
-
 
 
 class Player:

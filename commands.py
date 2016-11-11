@@ -1,9 +1,7 @@
 import random
 import time
-from socket import *
 
 import rpg
-from message_parsing import *
 from utils import *
 
 num_genrator = random.Random()
@@ -19,9 +17,6 @@ def send_ticket_to_ghozt(pseudo, message, msg_type, sock):
         send_public_message("il poura t'aider " + pseudo + " pour (" + message + ")", sock)
 
 
-
-
-
 def DIE(pseudo, message, msg_type, sock):
     if pseudo != "Tagashy":
         print_message("I don't think so " + pseudo, msg_type, sock, pseudo)
@@ -30,7 +25,17 @@ def DIE(pseudo, message, msg_type, sock):
         print_message("Ok master", msg_type, sock, pseudo)
         sock.send("QUIT :suis les ordres\r\n")
         sock.close()
+        end_other_thread()
         exit(0)
+
+
+def end_other_thread():
+    for tr in transferrer_list:
+        tr.stop()
+        print_message("[!] Transferer {} stopped".format(tr.name))
+    for rpg in rpg_list:
+        rpg.stop()
+        print_message("[!] RPG {} stopped".format(tr.name))
 
 
 def transfert_message_from_other_place(pseudo, message, msg_type, sock):
@@ -66,14 +71,30 @@ def transfert_message_from_other_place(pseudo, message, msg_type, sock):
                 print "[!] name of transferer user:" + external_bot_name
                 transfer = Transferrer(server_addr, channel, port, external_bot_name, sock, pseudo, couleur=color)
                 transfer.start()
+                sock.settimeout(0.5)
+                timeout_start = time.time() + 10
+                while not transfer.started:
+                    try:
+                        res = sock.recv(1024)
+                        for line in res.split("\r\n"):
+                            if "PING" in line:
+                                sock.send(line.replace("PING", "PONG") + "\r\n")
+                    except timeout:
+                        if time.time() > timeout_start:
+                            transfer.stop()
+                            print_message("Transfert cannot be start in 10 seconds aborting!", msg_type, sock, pseudo)
+                            sock.settimeout(None)
+                            return
+                        elif transfer.error is not None:
+                            transfer.stop()
+                            print_message("Transfert cannot be start because of error: " + transfer.error, msg_type,
+                                          sock, pseudo)
+                            sock.settimeout(None)
+                            return
+                sock.settimeout(None)
                 color += 1
                 if color > 15:
                     color = 2
-                while not transfer.started:
-                    res = sock.recv(1024)
-                    for line in res.split("\r\n"):
-                        if "PING" in line:
-                            sock.send(line.replace("PING", "PONG") + "\r\n")
                 print "[!] Transferring data from " + addr + channel + " started"
                 transferrer_list.append(transfer)
                 print_message("Transfert start", msg_type, sock, pseudo)
@@ -105,10 +126,7 @@ def transfert_message_from_other_place(pseudo, message, msg_type, sock):
                 else:
                     transfer = Transferrer(server_addr, channel, port, external_bot_name, sock, pseudo, couleur=color)
                 transfer.start()
-                color += 1
-                if color > 15:
-                    color = 2
-                sock.settimeout(2)
+                sock.settimeout(0.5)
                 timeout_start = time.time() + 10
                 while not transfer.started:
                     try:
@@ -116,13 +134,22 @@ def transfert_message_from_other_place(pseudo, message, msg_type, sock):
                         for line in res.split("\r\n"):
                             if "PING" in line:
                                 sock.send(line.replace("PING", "PONG") + "\r\n")
-                    except:
+                    except timeout:
                         if time.time() > timeout_start:
                             transfer.stop()
-                            print_message("Transfert cannot be start    ", msg_type, sock, pseudo)
+                            print_message("Transfert cannot be start in 10 seconds aborting!", msg_type, sock, pseudo)
+                            sock.settimeout(None)
+                            return
+                        elif transfer.error is not None:
+                            transfer.stop()
+                            print_message("Transfert cannot be start because of error: " + transfer.error, msg_type,
+                                          sock, pseudo)
                             sock.settimeout(None)
                             return
                 sock.settimeout(None)
+                color += 1
+                if color > 15:
+                    color = 2
                 print "[!] Transferring data from " + addr + channel + " started"
                 transferrer_list.append(transfer)
                 print_message("Transfert start", msg_type, sock, pseudo)
@@ -137,7 +164,8 @@ def check_not_already_use_transferer(server_addr, channel, external_port, target
             return 1
 
 
-def check_valid_sever(server_addr, channel, external_port, comp_serv=config.main_server, comp_channel=config.main_channel,
+def check_valid_sever(server_addr, channel, external_port, comp_serv=config.main_server,
+                      comp_channel=config.main_channel,
                       comp_port=config.main_port):
     server_addr = server_addr.lower()
     if server_addr[-1:] == ".":
@@ -190,7 +218,7 @@ def check_valid_sever(server_addr, channel, external_port, comp_serv=config.main
 def list_transferer(pseudo, message, msg_type, sock):
     print_message("List of transferer:", msg_type, sock, pseudo)
     for tr in transferrer_list:
-        print_message("{} on {} in channel {}".format(tr.bot_name, tr.addr, tr.channel), msg_type, sock, pseudo)
+        print_message("{} on {} in channel {}".format(tr.name, tr.addr, tr.channel), msg_type, sock, pseudo)
 
 
 def suppress_transferrer(pseudo, message, msg_type, sock):
@@ -202,7 +230,7 @@ def suppress_transferrer(pseudo, message, msg_type, sock):
     elif len(param) > 1:
         if "?" in param[0] or "?" in param[1]:
             print_message(usage, msg_type, sock, pseudo)
-        elif len(param) == 3:
+        elif len(param) >= 3:
             addr = param[1]
             server_addr = addr.split(":")
             if len(server_addr) == 1:
@@ -237,7 +265,8 @@ def start_rpg(pseudo, message, msg_type, sock):
         else:
             rpg_channel = "#RPG_" + str(num_genrator.randint(1000, 1000 * 1000))
             print_message("Starting RPG Game in channel : " + rpg_channel, msg_type, sock, pseudo)
-            rpg_game = rpg.Rpg(config.main_server, "RPG_MASTER" + str(num_genrator.randint(1000, 1000 * 1000)), rpg_channel,
+            rpg_game = rpg.Rpg(config.main_server, "RPG_MASTER" + str(num_genrator.randint(1000, 1000 * 1000)),
+                               rpg_channel,
                                config.main_port)
             rpg_game.start()
     elif len(param) == 2:
@@ -278,6 +307,12 @@ def start_rpg(pseudo, message, msg_type, sock):
         print_message("Starting RPG Game on server" + addr + " in channel : " + param[2], msg_type, sock, pseudo)
     if rpg_game is not None:
         rpg_list.append(rpg_game)
+
+
+def list_rpg(pseudo, message, msg_type, sock):
+    print_message("List of RPG:", msg_type, sock, pseudo)
+    for rpg in rpg_list:
+        print_message("{} on {} in channel {}".format(rpg.name, rpg.addr, rpg.channel), msg_type, sock, pseudo)
 
 
 def stop_rpg(pseudo, message, msg_type, sock):

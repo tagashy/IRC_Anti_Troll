@@ -46,9 +46,8 @@ class bot(threading.Thread):
                     if config.debug:
                         print line
                     pseudo, user_account, ip, msg_type, content, target = message_parsing.new_parsing(line)
-                    command_loop(pseudo, content, msg_type, self.sock, self.cmds)
-                    if content != "NONE":
-                        print "[" + msg_type + "]", "USER:", pseudo, "send:", content
+                    if not command_loop(pseudo, content, msg_type, self.sock, self.cmds):
+                        print_message("[" + msg_type + "] USER: "+ pseudo+ " send: "+ content)
 
 
 def commands_init():
@@ -63,31 +62,53 @@ def commands_init():
     cmds.append(cmd)
     cmd = Command(["!rpg", "!rpg?"], commands.start_rpg, "Rpg")
     cmds.append(cmd)
+    cmd = Command(["!list_rpg", "!list_rpg?"], commands.list_rpg, "List Rpg")
+    cmds.append(cmd)
     cmd = Command(["!kill_rpg", "!kill_rpg?"], commands.stop_rpg, "Kill Rpg")
     cmds.append(cmd)
-    cmd = Command([" help ", " aide "], commands.send_ticket_to_ghozt, "TICKET TO GHOZT", match=True,helpable=False)
+    cmd = Command([" help ", " aide "], commands.send_ticket_to_ghozt, "TICKET TO GHOZT", match=True, helpable=False)
     cmds.append(cmd)
     return cmds
 
 
-def STD_Input():
-    #global TagaBot
-    sock = TagaBot.sock
-    cmds=[]
-    cmd=Command(["!migrate","!migrate?"],commands.migration,"Migrate")
-    cmds.append(cmd)
+class STD_INPUT(threading.Thread):
+    def __init__(self, sock):
+        threading.Thread.__init__(self)
+        self._stop = threading.Event()
+        self.cmds = commands_init()
+        self.sock = sock
 
-    while 1:
-        data = raw_input()
-        if command_loop("STDIN",data,"STDIN",sock,cmds):
-            print "[!] EXECUTED VIA STDIN"
-        else:
-            try:
-                exec data
-            except:
-                sock.send(data)
+    def run(self):
+        cmds = []
+        cmd = Command(["!migrate", "!migrate?"], commands.migration, "Migrate")
+        cmds.append(cmd)
+
+        while 1:
+            if self.stopped():
+                self.end()
+            data = raw_input()
+            if command_loop("STDIN", data, "STDIN", self.sock, cmds):
+                print "[!] EXECUTED VIA STDIN"
+            else:
+                try:
+                    exec data
+                except:
+                    self.sock.send(data)
+
+    def stop(self):
+        self._stop.set()
+
+    def stopped(self):
+        return self._stop.isSet()
 
 
 TagaBot = bot(config.main_server, config.bot_name, config.main_channel, config.main_port)
 TagaBot.start()
-STD_Input()
+input_obj = STD_INPUT(TagaBot.sock)
+input_obj.daemon = True
+input_obj.start()
+TagaBot.join()
+input_obj.stop()
+commands.end_other_thread()
+# TagaBot.stop()
+print "[!] End"
