@@ -4,6 +4,7 @@ import commands
 import message_parsing
 import utils
 from command_class import *
+from config import config
 
 
 class bot(threading.Thread):
@@ -54,17 +55,20 @@ def commands_init():
     cmds = []
     cmd = Command("!die", commands.DIE, "DIE")
     cmds.append(cmd)
-    cmd = Command(["!transfert", "!transfert?"], commands.transfert_message_from_other_place, "Tranfert")
+    cmd = Command(["!transfert", "!transfert?"], commands.transfert_message_from_other_place, "Tranfert",
+                  args=[("server", "require"), ("#channel", "require")])
     cmds.append(cmd)
     cmd = Command("!list_transfert", commands.list_transferer, "List Tranfert")
     cmds.append(cmd)
-    cmd = Command(["!kill_transfert", "!kill_transfert?"], commands.suppress_transferrer, "Kill Tranfert")
+    cmd = Command(["!kill_transfert", "!kill_transfert?"], commands.suppress_transferrer, "Kill Tranfert",
+                  args=[("server", "require"), ("#channel", "require")])
     cmds.append(cmd)
-    cmd = Command(["!rpg", "!rpg?"], commands.start_rpg, "Rpg")
+    cmd = Command(["!rpg", "!rpg?"], commands.start_rpg, "Rpg", args=[("server", "optional"), ("channel", "optional")])
     cmds.append(cmd)
     cmd = Command(["!list_rpg", "!list_rpg?"], commands.list_rpg, "List Rpg")
     cmds.append(cmd)
-    cmd = Command(["!kill_rpg", "!kill_rpg?"], commands.stop_rpg, "Kill Rpg")
+    cmd = Command(["!kill_rpg", "!kill_rpg?"], commands.stop_rpg, "Kill Rpg",
+                  args=[("server", "require"), ("channel", "require")])
     cmds.append(cmd)
     cmd = Command([" help ", " aide "], commands.send_ticket_to_ghozt, "TICKET TO GHOZT", match=True, helpable=False)
     cmds.append(cmd)
@@ -84,7 +88,8 @@ class STD_INPUT(threading.Thread):
 
     def run(self):
         cmds = []
-        cmd = Command(["!migrate", "!migrate?"], commands.migration, "Migrate")
+        cmd = Command(["!migrate", "!migrate?"], commands.migration, "Migrate",
+                      args=[("channel", "require"), ("server", "optional")])
         cmds.append(cmd)
 
         while 1:

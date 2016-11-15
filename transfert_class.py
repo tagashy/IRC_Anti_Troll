@@ -19,7 +19,7 @@ class Transferrer(threading.Thread):
         self.couleur = couleur
         self.users = None
         self.started = False
-        self.error=None
+        self.error = None
 
     def stop(self):
         self._stop.set()
@@ -34,10 +34,10 @@ class Transferrer(threading.Thread):
             send_public_message(message, self.send_sock)
 
     def run(self):
-        invisible_cara=31#caracter to escape highlights
+        invisible_cara = 31  # caracter to escape highlights
         self.users, self.recv_sock = utils.create_irc_socket(self.addr, self.name, self.channel, self.port)
         if self.recv_sock == -1:
-            self.error="Throttled"
+            self.error = "Throttled"
             exit(-1)
         elif self.recv_sock == -2:
             self.error = "Registration timeout"
@@ -45,7 +45,7 @@ class Transferrer(threading.Thread):
         elif self.recv_sock == -3:
             self.error = "Link closed"
             exit(-3)
-        print_message( "[!] Initialisation of tranfert done")
+        print_message("[!] Initialisation of tranfert done")
         self.recv_sock.settimeout(2)
         self.started = True
         while 1:
@@ -59,7 +59,7 @@ class Transferrer(threading.Thread):
                     self.recv_sock.send(res.replace("PING", "PONG"))
                 elif res.strip() != "":
                     if config.debug:
-                        print_message( res)
+                        print_message(res)
                     user, user_account, ip, msg_type, message, target = new_parsing(res)
                     if msg_type == "PUBMSG":
 
@@ -69,26 +69,27 @@ class Transferrer(threading.Thread):
                         )
                     elif msg_type == "PRIVMSG":
                         self.send_message(
-                            chr(3) + str(self.couleur) + "Private message from user " + user[0:1] + chr(invisible_cara) + user[
-                                                                                                                1:] + ">" + message)
+                            chr(3) + str(self.couleur) + "Private message from user " + user[0:1] + chr(
+                                invisible_cara) + user[
+                                                  1:] + ">" + message)
                     elif msg_type == "JOIN":
                         self.users.append(user)
                         self.send_message(
                             chr(3) + str(self.couleur) + "User " + user[0:1] + chr(invisible_cara) + user[
-                                                                                           1:] + " has join channel")
+                                                                                                     1:] + " has join channel")
                     elif msg_type == "QUIT":
                         self.users.remove(user)
                         self.send_message(
                             chr(3) + str(self.couleur) + "User " + user[0:1] + chr(invisible_cara) + user[
-                                                                                           1:] + " has quit server with msg : " + message)
+                                                                                                     1:] + " has quit server with msg : " + message)
                     elif msg_type == "PART":
                         if user in self.users:
                             self.users.remove(user)
-                        elif "@"+user in self.users:
-                            self.users.remove("@"+user)
+                        elif "@" + user in self.users:
+                            self.users.remove("@" + user)
                         self.send_message(
                             chr(3) + str(self.couleur) + "User " + user[0:1] + chr(invisible_cara) + user[
-                                                                                           1:] + " has quit channel with msg : " + message)
+                                                                                                     1:] + " has quit channel with msg : " + message)
 
             except timeout:
                 pass
