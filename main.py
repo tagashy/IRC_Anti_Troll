@@ -47,7 +47,7 @@ class bot(threading.Thread):
                         print line
                     pseudo, user_account, ip, msg_type, content, target = message_parsing.new_parsing(line)
                     if not command_loop(pseudo, content, msg_type, self.sock, self.cmds):
-                        print_message("[" + msg_type + "] USER: "+ pseudo+ " send: "+ content)
+                        print_message("[" + msg_type + "] USER: " + pseudo + " send: " + content)
 
 
 def commands_init():
@@ -78,6 +78,10 @@ class STD_INPUT(threading.Thread):
         self.cmds = commands_init()
         self.sock = sock
 
+    def end(self):
+        print_message("[!] ABORTING")
+        exit(0)
+
     def run(self):
         cmds = []
         cmd = Command(["!migrate", "!migrate?"], commands.migration, "Migrate")
@@ -88,7 +92,7 @@ class STD_INPUT(threading.Thread):
                 self.end()
             data = raw_input()
             if command_loop("STDIN", data, "STDIN", self.sock, cmds):
-                print "[!] EXECUTED VIA STDIN"
+                print_message("[!] EXECUTED VIA STDIN")
             else:
                 try:
                     exec data

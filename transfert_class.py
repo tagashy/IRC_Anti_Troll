@@ -45,7 +45,7 @@ class Transferrer(threading.Thread):
         elif self.recv_sock == -3:
             self.error = "Link closed"
             exit(-3)
-        print "[!] Initialisation of tranfert done"
+        print_message( "[!] Initialisation of tranfert done")
         self.recv_sock.settimeout(2)
         self.started = True
         while 1:
@@ -59,7 +59,7 @@ class Transferrer(threading.Thread):
                     self.recv_sock.send(res.replace("PING", "PONG"))
                 elif res.strip() != "":
                     if config.debug:
-                        print res
+                        print_message( res)
                     user, user_account, ip, msg_type, message, target = new_parsing(res)
                     if msg_type == "PUBMSG":
 

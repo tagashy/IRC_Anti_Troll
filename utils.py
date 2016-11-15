@@ -21,7 +21,7 @@ def create_irc_socket(addr, bot_name, channel, port=6667):
         while 1:
             res = recv_sock.recv(1024)
             if config.debug:
-                print res
+                print_message( res)
             if "[Throttled]" in res:
                 print_message("[W] Unable to register because of throttled connection")
                 return -1,-1
@@ -36,12 +36,12 @@ def create_irc_socket(addr, bot_name, channel, port=6667):
     except timeout:
         recv_sock.send("JOIN " + channel + "\r\n")
         recv_sock.settimeout(None)
-        print "[!] Join " + channel + " send"
+        print_message( "[!] Join " + channel + " send")
 
     while " 366 " not in res:
         res = recv_sock.recv(1024)
         if config.debug:
-            print res
+            print_message( res)
         if " 353 " in res:
             print_message("[!] creation of user list")
             users += parse_name_list(res, name_list_reg)

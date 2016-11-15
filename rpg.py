@@ -48,7 +48,7 @@ class Rpg(threading.Thread):
                     self.sock.send(res.replace("PING", "PONG"))
                 elif res.strip() != "":
                     if config.debug:
-                        print res
+                        print_message(res)
                     user, user_account, ip, msg_type, message, target = new_parsing(res)
                     if message.startswith("!join"):
                         param = message.split(" ")
@@ -83,7 +83,7 @@ class Rpg(threading.Thread):
                     self.sock.send(res.replace("PING", "PONG"))
                 elif res.strip() != "":
                     if config.debug:
-                        print res
+                        print_message(res)
                     user, user_account, ip, msg_type, message, target = new_parsing(res)
                     self.command_choice(message, user)
 
@@ -96,13 +96,13 @@ class Rpg(threading.Thread):
             if isinstance(cmd.keyword, str):
                 if message == cmd.keyword:
                     if config.debug:
-                        print "[!] function " + cmd.name + " called by " + user
+                        print_message("[!] function " + cmd.name + " called by " + user)
                     cmd.function(param, user)
             else:
                 for key in cmd.keyword:
                     if message.startswith(key + " ") or message == key:
                         if config.debug:
-                            print "[!] function " + cmd.name + " called by " + user
+                            print_message("[!] function " + cmd.name + " called by " + user)
                         cmd.function(param, user)
 
     def fireball(self, param, user):
