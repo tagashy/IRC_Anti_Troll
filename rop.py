@@ -33,7 +33,15 @@ class RopThread(threading.Thread):
                 self.send_result(res,fichier)
 
 
-    def send_result(self,content,fichier):
+    def send_result(self,contents,fichier):
+        content=""
+        ROP_START=False
+        for line in contents:
+            if ROP_START:
+                content+=line
+            elif "ROP chain generation" in line:
+                content+=line
+                ROP_START=True
         url = "http://hastebin.com/"
         r = requests.post(url + "documents", data=content)
         print_message(r.text)
