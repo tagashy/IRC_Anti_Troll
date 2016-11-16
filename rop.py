@@ -1,6 +1,6 @@
 import json
 import os
-import random
+import requests
 import threading
 from subprocess import Popen, PIPE
 import drivers
@@ -12,7 +12,6 @@ from command_class import *
 class RopThread(threading.Thread):
     def __init__(self, pseudo, message, msg_type, sock):
         threading.Thread.__init__(self)
-        self.handlers = init_protocol_handler()
         self.pseudo = pseudo
         self.msg_type = msg_type
         self.sock = sock
@@ -21,7 +20,7 @@ class RopThread(threading.Thread):
     def run(self):
         fichier, params, user, password = parse(self.message)
         if fichier is not None:
-            fichier = self.get_file(fichier, user, password)
+            fichier = drivers.get_file(fichier, user, password)
             if params != []:
                 res = rop(params, fichier)
             else:
@@ -58,17 +57,7 @@ class RopThread(threading.Thread):
             print_message("content is None")
         os.remove(fichier)
 
-    def get_file(self, path, user, password):
-        fichier = str(name_gen.randint(0, 1000 * 1000)) + ".bin"
-        get_type = path.split(":")[0]
-        print_message(get_type)
-        for handle in self.handlers:
-            if handle.keyword == get_type:
-                if handle.function(path, fichier, user, password):
-                    return fichier
-                else:
-                    return -2
-        return -1
+
 
 
 def rop(params="--ropchain", path="/root/root-me/app-sys/ch32"):
