@@ -1,11 +1,11 @@
 import json
-import random
-import shutil
-from subprocess import *
-import threading
-import requests
 import os
+import random
+import threading
+from subprocess import *
+
 from command_class import *
+from drivers import *
 from utils import print_message
 
 name_gen = random.Random()
@@ -22,28 +22,33 @@ class RopThread(threading.Thread):
         self.message = message
 
     def run(self):
-        fichier, params = parse(self.message)
+        fichier, params, user, password = parse(self.message)
         if fichier is not None:
-            fichier = self.get_file(fichier)
+            fichier = self.get_file(fichier,user,password)
             if params != []:
                 res = rop(params, fichier)
             else:
                 res = rop(path=fichier)
-            if res != -1:
-                self.send_result(res,fichier)
+            if res > 0:
+                self.send_result(res, fichier)
+            elif res == -1:
+                print_message("No driver for this type of file", self.msg_type, self.sock, self.pseudo)
+            elif res == -2:
+                print_message(
+                    "ERROR during recuperation of file (you may need to provide credential depending of the protocol)",
+                    self.msg_type, self.sock, self.pseudo)
 
-
-    def send_result(self,contents,fichier):
-        content=""
-        rop_start=False
+    def send_result(self, contents, fichier):
+        content = ""
+        rop_start = False
         for line in contents.split("\n"):
             if rop_start:
-                content+=line+"\n"
+                content += line + "\n"
             elif "ROP chain generation" in line:
-                content+=line
-                rop_start=True
+                content += line
+                rop_start = True
         print_message(content)
-        if content!= "":
+        if content != "":
             url = "http://hastebin.com/"
             r = requests.post(url + "documents", data=content)
             print_message(r.text)
@@ -56,15 +61,17 @@ class RopThread(threading.Thread):
             print_message("content is None")
         os.remove(fichier)
 
-    def get_file(self, path):
-            fichier = str(name_gen.randint(0, 1000 * 1000)) + ".bin"
-            get_type = path.split(":")[0]
-            print_message(get_type)
-            for handle in self.handlers:
-                if handle.keyword == get_type:
-                    if handle.function(path, fichier):
-                        return fichier
-            return -1
+    def get_file(self, path,user,password):
+        fichier = str(name_gen.randint(0, 1000 * 1000)) + ".bin"
+        get_type = path.split(":")[0]
+        print_message(get_type)
+        for handle in self.handlers:
+            if handle.keyword == get_type:
+                if handle.function(path, fichier,user,password):
+                    return fichier
+                else:
+                    return -2
+        return -1
 
 
 def rop(params="--ropchain", path="/root/root-me/app-sys/ch32"):
@@ -89,18 +96,27 @@ def rop(params="--ropchain", path="/root/root-me/app-sys/ch32"):
 
 
 def parse(message):
+    user = None
+    password = None
     params = message.split(" ")
     args = []
     extra_arg = False
     fichier = None
+
     for param in params:
-        if extra_arg:
+        splitted =param.split("=")[0]
+        if  splitted == "--user" and len(splitted)>1:
+            user=splitted[1]
+        elif  splitted == "--password" and len(splitted)>1:
+            password=splitted[1]
+        elif extra_arg:
             args.append(param)
         elif "--args" == param:
             extra_arg = True
-        elif param.split("=")[0] == "file":
+        elif splitted == "file" and len(splitted)>1:
             fichier = param[5:]
-    return fichier, args
+
+    return fichier, args, user, password
 
 
 def init_protocol_handler():
@@ -110,27 +126,6 @@ def init_protocol_handler():
     handler = Command("local", get_local_file, "LOCAL")
     handlers.append(handler)
     return handlers
-
-
-def get_local_file(path, fichier):
-    try:
-        path = path.replace("local:", "")
-        shutil.copy2(path, fichier)
-        return 1
-    except:
-        return -1
-
-
-def get_http_file(path, fichier):
-    r = requests.get(path, stream=True)
-    if r.status_code == 200:
-        with open(fichier, 'wb') as f:
-            r.raw.decode_content = True
-            shutil.copyfileobj(r.raw, f)
-            return 1
-    else:
-        print_message("Not Able To Download")
-        return -1
 
 
 if __name__ == '__main__':
