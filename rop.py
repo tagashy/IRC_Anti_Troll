@@ -53,7 +53,7 @@ class RopThread(threading.Thread):
 def rop(params="--ropchain", path="/root/root-me/app-sys/ch32"):
     if isinstance(params, str):
         params = [params]
-    elif not isinstance(params, dict):
+    elif not isinstance(params, list):
         return -1
     program_name = "ROPgadget"
     args = [program_name]
