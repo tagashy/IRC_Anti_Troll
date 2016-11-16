@@ -63,10 +63,13 @@ def rop(params="--ropchain", path="/root/root-me/app-sys/ch32"):
     args.append(path)
     print args
     proc = Popen(args, stdout=PIPE)
-    out, err = proc.communicate()
-    for line in out.split("\n"):
+    outs=""
+    while proc.poll() is None:
+        out, err = proc.communicate()
+        outs+=out
+    for line in outs.split("\n"):
         print_message(line)
-    return out
+    return outs
 
 
 def parse(message):
