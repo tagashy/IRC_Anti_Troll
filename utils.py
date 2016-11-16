@@ -2,8 +2,8 @@ import re
 from socket import *
 from config import config
 if config.log:
-    import logging
-    log=logging.Log()
+    import Bot_log
+    log=Bot_log.Log()
 
 def create_irc_socket(addr, bot_name, channel, port=6667):
     name_list_reg = re.compile("(?<= 353 " + bot_name + " = " + channel + " :).*")
