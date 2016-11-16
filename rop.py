@@ -25,7 +25,10 @@ class RopThread(threading.Thread):
         fichier, params = parse(self.message)
         if fichier is not None:
             fichier = self.get_file(fichier)
-            res = rop(path=fichier)
+            if params != []:
+                res=rop(params,fichier)
+            else:
+                res = rop(path=fichier)
             if res != -1:
                 url = "http://hastebin.com/"
                 r = requests.post(url + "documents", data=res)
