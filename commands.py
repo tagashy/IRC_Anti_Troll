@@ -1,6 +1,7 @@
 import random
 import time
 
+import rop
 import rpg
 from utils import *
 
@@ -68,7 +69,7 @@ def transfert_message_from_other_place(pseudo, message, msg_type, sock):
                 print_message("Transferer already exist", msg_type, sock, pseudo)
             else:
                 external_bot_name = "user_" + str(num_genrator.randint(1000, 1000 * 1000))
-                print_message( "[!] name of transferer user:" + external_bot_name)
+                print_message("[!] name of transferer user:" + external_bot_name)
                 transfer = Transferrer(server_addr, channel, port, external_bot_name, sock, pseudo, couleur=color)
                 transfer.start()
                 sock.settimeout(0.5)
@@ -95,7 +96,7 @@ def transfert_message_from_other_place(pseudo, message, msg_type, sock):
                 color += 1
                 if color > 15:
                     color = 2
-                print_message( "[!] Transferring data from " + addr + channel + " started")
+                print_message("[!] Transferring data from " + addr + channel + " started")
                 transferrer_list.append(transfer)
                 print_message("Transfert start", msg_type, sock, pseudo)
 
@@ -120,7 +121,7 @@ def transfert_message_from_other_place(pseudo, message, msg_type, sock):
             else:
                 send_type = param[3]
                 external_bot_name = "user_" + str(num_genrator.randint(1000, 1000 * 1000))
-                print_message( "[!] name of transferer user:" + external_bot_name)
+                print_message("[!] name of transferer user:" + external_bot_name)
                 if send_type.lower() == "publique" or send_type.lower() == "public":
                     transfer = Transferrer(server_addr, channel, port, external_bot_name, sock, couleur=color)
                 else:
@@ -150,7 +151,7 @@ def transfert_message_from_other_place(pseudo, message, msg_type, sock):
                 color += 1
                 if color > 15:
                     color = 2
-                print_message( "[!] Transferring data from " + addr + channel + " started")
+                print_message("[!] Transferring data from " + addr + channel + " started")
                 transferrer_list.append(transfer)
                 print_message("Transfert start", msg_type, sock, pseudo)
 
@@ -158,8 +159,8 @@ def transfert_message_from_other_place(pseudo, message, msg_type, sock):
 def check_not_already_use_transferer(server_addr, channel, external_port, target=None):
     for tr in transferrer_list:
         if config.debug:
-            print_message( "[D]", server_addr, channel, external_port, tr.addr, tr.channel, tr.port, tr.pseudo, target)
-            print_message( "[D]", tr.pseudo == target)
+            print_message("[D]", server_addr, channel, external_port, tr.addr, tr.channel, tr.port, tr.pseudo, target)
+            print_message("[D]", tr.pseudo == target)
         if check_valid_sever(server_addr, channel, external_port, tr.addr, tr.channel, tr.port) and tr.pseudo == target:
             return 1
 
@@ -175,21 +176,22 @@ def check_valid_sever(server_addr, channel, external_port, comp_serv=config.main
         external_addrs = getaddrinfo(server_addr, external_port)
         addrs = getaddrinfo(comp_serv, comp_port)
     except:
-        print_message( "[W] Invalid Address")
+        print_message("[W] Invalid Address")
         return 1
     if config.debug:
-        print_message( "[D] ip address of server {}".format(addrs))
+        print_message("[D] ip address of server {}".format(addrs))
     for data in addrs:
         if len(data) >= 5:
             adresse = data[4][0]
         else:
             adresse = ""
         if config.debug:
-            print_message( "[D] adresse of main serv '{}', adresse of external serv '{}', equal :{}".format(adresse, server_addr,
-                                                                                                   adresse == server_addr))
-            print_message( "[D] channel of main serv '{}', channel of external serv '{}', equal :{}".format(comp_channel,
-                                                                                                   channel,
-                                                                                                   comp_channel == channel))
+            print_message(
+                "[D] adresse of main serv '{}', adresse of external serv '{}', equal :{}".format(adresse, server_addr,
+                                                                                                 adresse == server_addr))
+            print_message("[D] channel of main serv '{}', channel of external serv '{}', equal :{}".format(comp_channel,
+                                                                                                           channel,
+                                                                                                           comp_channel == channel))
         if adresse == server_addr and channel == comp_channel:
             return 1
         for external_data in external_addrs:
@@ -198,19 +200,23 @@ def check_valid_sever(server_addr, channel, external_port, comp_serv=config.main
             else:
                 external_adresse = ""
             if config.debug:
-                print_message( "[D] ip adresse of main serv '{}', adresse of external serv '{}', equal :{}".format(adresse,
-                                                                                                          server_addr,
-                                                                                                          adresse == external_adresse))
-                print_message( "[D] channel of main serv '{}', channel of external serv '{}', equal :{}".format(comp_channel,
-                                                                                                       channel,
-                                                                                                       comp_channel == channel))
+                print_message(
+                    "[D] ip adresse of main serv '{}', adresse of external serv '{}', equal :{}".format(adresse,
+                                                                                                        server_addr,
+                                                                                                        adresse == external_adresse))
+                print_message(
+                    "[D] channel of main serv '{}', channel of external serv '{}', equal :{}".format(comp_channel,
+                                                                                                     channel,
+                                                                                                     comp_channel == channel))
             if adresse == external_adresse and channel == comp_channel:
                 return 1
     if config.debug:
-        print_message( "[D] adresse of main serv '{}', adresse of external serv '{}', equal :{}".format(comp_serv, server_addr,
-                                                                                               comp_serv == server_addr))
-        print_message( "[D] channel of main serv '{}', channel of external serv '{}', equal :{}".format(comp_channel, channel,
-                                                                                               comp_channel == channel))
+        print_message(
+            "[D] adresse of main serv '{}', adresse of external serv '{}', equal :{}".format(comp_serv, server_addr,
+                                                                                             comp_serv == server_addr))
+        print_message(
+            "[D] channel of main serv '{}', channel of external serv '{}', equal :{}".format(comp_channel, channel,
+                                                                                             comp_channel == channel))
     if channel == comp_channel and server_addr == comp_serv:
         return 1
 
@@ -248,7 +254,7 @@ def suppress_transferrer(pseudo, message, msg_type, sock):
                 if tr.port == port and tr.addr == server_addr and tr.channel == channel:
                     tr.stop()
                     tr_stopped = True
-                    print_message( "[!] transferrer " + tr.channel + " stopped")
+                    print_message("[!] transferrer " + tr.channel + " stopped")
                     transferrer_list.remove(tr)
                     print_message("transferrer " + tr.channel + " stopped", msg_type, sock, pseudo)
             if not tr_stopped:
@@ -342,9 +348,13 @@ def stop_rpg(pseudo, message, msg_type, sock):
                 if rpg_game.port == port and rpg_game.addr == server_addr and rpg_game.channel == channel:
                     rpg_game.stop()
                     tr_stopped = True
-                    print_message( "[!] RPG " + rpg_game.channel + " stopped")
+                    print_message("[!] RPG " + rpg_game.channel + " stopped")
             if not tr_stopped:
                 print_message("no RPG like this one", msg_type, sock, pseudo)
+
+
+def rop_start(pseudo, message, msg_type, sock):
+    rop.RopThread(pseudo, message, msg_type, sock).start()
 
 
 def migration(pseudo, message, msg_type, sock):
