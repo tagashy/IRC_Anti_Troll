@@ -1,10 +1,10 @@
 import json
 import random
 from subprocess import *
-
+import threading
 import drivers
 from command_class import *
-from utils import print_message
+import os
 
 name_gen = random.Random()
 name_gen.seed()
@@ -22,7 +22,7 @@ class RopThread(threading.Thread):
     def run(self):
         fichier, params, user, password = parse(self.message)
         if fichier is not None:
-            fichier = self.get_file(fichier,user,password)
+            fichier = self.get_file(fichier, user, password)
             if params != []:
                 res = rop(params, fichier)
             else:
@@ -59,13 +59,13 @@ class RopThread(threading.Thread):
             print_message("content is None")
         os.remove(fichier)
 
-    def get_file(self, path,user,password):
+    def get_file(self, path, user, password):
         fichier = str(name_gen.randint(0, 1000 * 1000)) + ".bin"
         get_type = path.split(":")[0]
         print_message(get_type)
         for handle in self.handlers:
             if handle.keyword == get_type:
-                if handle.function(path, fichier,user,password):
+                if handle.function(path, fichier, user, password):
                     return fichier
                 else:
                     return -2
@@ -102,16 +102,16 @@ def parse(message):
     fichier = None
 
     for param in params:
-        splitted =param.split("=")[0]
-        if  splitted == "--user" and len(splitted)>1:
-            user=splitted[1]
-        elif  splitted == "--password" and len(splitted)>1:
-            password=splitted[1]
+        splitted = param.split("=")[0]
+        if splitted == "--user" and len(splitted) > 1:
+            user = splitted[1]
+        elif splitted == "--password" and len(splitted) > 1:
+            password = splitted[1]
         elif extra_arg:
             args.append(param)
         elif "--args" == param:
             extra_arg = True
-        elif splitted == "file" and len(splitted)>1:
+        elif splitted == "file" and len(splitted) > 1:
             fichier = param[5:]
 
     return fichier, args, user, password
