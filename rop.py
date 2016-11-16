@@ -1,10 +1,12 @@
 import json
+import os
 import random
 import shutil
-from subprocess import *
 import threading
+from subprocess import *
+
 import requests
-import os
+
 from command_class import *
 from utils import print_message
 
@@ -26,12 +28,13 @@ class RopThread(threading.Thread):
         if fichier is not None:
             fichier = self.get_file(fichier)
             if params != []:
-                res=rop(params,fichier)
+                res = rop(params, fichier)
             else:
                 res = rop(path=fichier)
             if res != -1:
                 url = "http://hastebin.com/"
                 r = requests.post(url + "documents", data=res)
+                print_message(r.text)
                 data = json.loads(r.text)
                 if "key" in data:
                     print_message("url of ROP: " + url + data["key"], self.msg_type, self.sock, self.pseudo)
@@ -63,10 +66,10 @@ def rop(params="--ropchain", path="/root/root-me/app-sys/ch32"):
     args.append(path)
     print args
     proc = Popen(args, stdout=PIPE)
-    outs=""
+    outs = ""
     while proc.poll() is None:
         out, err = proc.communicate()
-        outs+=out
+        outs += out
     for line in outs.split("\n"):
         print_message(line)
     return outs
