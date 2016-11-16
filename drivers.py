@@ -1,7 +1,52 @@
+import random
 import shutil
 from ftplib import FTP
 
+import paramiko
 import requests
+
+from command_class import Command
+
+
+def init_protocol_handler():
+    handlers = []
+    handler = Command("http", get_http_file, "HTTP")
+    handlers.append(handler)
+    handler = Command("local", get_local_file, "LOCAL")
+    handlers.append(handler)
+    handler = Command("ftp", get_ftp_file, "FTP")
+    handlers.append(handler)
+    return handlers
+
+
+def get_file(self, path, user, password):
+    fichier = str(name_gen.randint(0, 1000 * 1000)) + ".bin"
+    get_type = path.split(":")[0]
+    for handle in handlers:
+        if handle.keyword == get_type:
+            if handle.function(path, fichier, user, password):
+                return fichier
+            else:
+                return -2
+    return -1
+
+
+def get_scp_file(path, fichier, user=None, password=None):
+    try:
+        path = path.replace("scp:", "")
+        server = path.split(":")[0]
+        port = path.split(":")[1].split("/")[0]
+        try :
+            port = int(port)
+        except:
+            port = 22
+        client = paramiko.SSHClient()
+        client.load_system_host_keys()
+        client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        client.connect(server, port, user, password)
+        return 1
+    except:
+        return -1
 
 
 def get_local_file(path, fichier, user=None, password=None):
@@ -51,6 +96,10 @@ def get_ftp_file(path, fichier, user=None, password=None):
     except:
         return -1
 
-if __name__ == '__main__':
 
+name_gen = random.Random()
+name_gen.seed()
+handlers = init_protocol_handler()
+
+if __name__ == '__main__':
     print get_http_file("ftp:51.254.128.177/test", "test.titi", "tagashy", "2ZsXdR(TgB")
