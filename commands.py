@@ -370,4 +370,14 @@ def migration(pseudo, message, msg_type, sock):
         print_message("Migration done", msg_type, sock, pseudo)
 
 
+def reload_bot(pseudo, message, msg_type, sock):
+    print_message("starting the reload", msg_type, sock, pseudo)
+    param = message.split(" ")
+    if len(param) == 2:
+        if param[1] == "all":
+            reload(rop)
+            reload(rpg)
+            print_message("reload finished", msg_type, sock, pseudo)
+
+
 from transfert_class import Transferrer

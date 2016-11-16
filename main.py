@@ -72,7 +72,9 @@ def commands_init():
     cmds.append(cmd)
     cmd = Command([" help ", " aide "], commands.send_ticket_to_ghozt, "TICKET TO GHOZT", match=True, helpable=False)
     cmds.append(cmd)
-    cmd = Command(["!rop","!rop?"], commands.rop_start, "ROP", args={"file=...": "require", "args ...": "optional"})
+    cmd = Command(["!rop", "!rop?"], commands.rop_start, "ROP", args=[("file=...", "require"), ("args ...", "optional")])
+    cmds.append(cmd)
+    cmd = Command(["!reload", "!reload?"], commands.reload_bot, "RELOAD", args=[("module/all", "require")])
     cmds.append(cmd)
     return cmds
 
