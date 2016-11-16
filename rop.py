@@ -42,14 +42,16 @@ class RopThread(threading.Thread):
             elif "ROP chain generation" in line:
                 content+=line
                 ROP_START=True
-        url = "http://hastebin.com/"
-        r = requests.post(url + "documents", data=content)
-        print_message(r.text)
-        data = json.loads(r.text)
-        if "key" in data:
-            print_message("url of ROP: " + url + data["key"], self.msg_type, self.sock, self.pseudo)
-        else:
-            print_message("ERROR AFTER POST", self.msg_type, self.sock, self.pseudo)
+        print_message(content)
+        if content!= "":
+            url = "http://hastebin.com/"
+            r = requests.post(url + "documents", data=content)
+            print_message(r.text)
+            data = json.loads(r.text)
+            if "key" in data:
+                print_message("url of ROP: " + url + data["key"], self.msg_type, self.sock, self.pseudo)
+            else:
+                print_message("ERROR AFTER POST", self.msg_type, self.sock, self.pseudo)
         os.remove(fichier)
 
     def get_file(self, path):
