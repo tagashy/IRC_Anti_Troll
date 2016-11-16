@@ -19,7 +19,7 @@ def init_protocol_handler():
     return handlers
 
 
-def get_file(self, path, user, password):
+def get_file( path, user, password):
     fichier = str(name_gen.randint(0, 1000 * 1000)) + ".bin"
     get_type = path.split(":")[0]
     for handle in handlers:
