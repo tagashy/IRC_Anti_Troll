@@ -5,7 +5,7 @@ import threading
 from subprocess import *
 
 from command_class import *
-from drivers import *
+import drivers
 from utils import print_message
 
 name_gen = random.Random()
@@ -121,9 +121,11 @@ def parse(message):
 
 def init_protocol_handler():
     handlers = []
-    handler = Command("http", get_http_file, "HTTP")
+    handler = Command("http", drivers.get_http_file, "HTTP")
     handlers.append(handler)
-    handler = Command("local", get_local_file, "LOCAL")
+    handler = Command("local", drivers.get_local_file, "LOCAL")
+    handlers.append(handler)
+    handler = Command("ftp", drivers.get_ftp_file, "FTP")
     handlers.append(handler)
     return handlers
 
