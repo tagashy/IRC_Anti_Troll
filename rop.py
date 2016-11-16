@@ -1,11 +1,9 @@
 import json
-import os
 import random
-import threading
 from subprocess import *
 
-from command_class import *
 import drivers
+from command_class import *
 from utils import print_message
 
 name_gen = random.Random()

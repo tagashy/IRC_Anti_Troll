@@ -30,7 +30,6 @@ def DIE(pseudo, message, msg_type, sock):
         print_message("I don't think so " + pseudo, msg_type, sock, pseudo)
 
 
-
 def end_other_thread():
     for tr in transferrer_list:
         tr.stop()
