@@ -51,5 +51,6 @@ def get_ftp_file(path, fichier, user=None, password=None):
     except:
         return -1
 
+if __name__ == '__main__':
 
-print get_http_file("ftp:51.254.128.177/test", "test.titi", "tagashy", "2ZsXdR(TgB")
+    print get_http_file("ftp:51.254.128.177/test", "test.titi", "tagashy", "2ZsXdR(TgB")
