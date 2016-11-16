@@ -5,3 +5,4 @@ class config:
     main_port = 6667
     debug = False
     log=True
+    admin="Tagashy"

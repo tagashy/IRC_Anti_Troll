@@ -53,6 +53,8 @@ class bot(threading.Thread):
 
 def commands_init():
     cmds = []
+    cmd = Command(["!reload", "!reload?"], commands.reload_bot, "RELOAD", args=[("module/all", "require")])
+    cmds.append(cmd)
     cmd = Command("!die", commands.DIE, "DIE")
     cmds.append(cmd)
     cmd = Command(["!transfert", "!transfert?"], commands.transfert_message_from_other_place, "Tranfert",
@@ -74,8 +76,6 @@ def commands_init():
     cmds.append(cmd)
     cmd = Command(["!rop", "!rop?"], commands.rop_start, "ROP", args=[("file=...", "require"), ("--args ...", "optional")])
     cmds.append(cmd)
-    cmd = Command(["!reload", "!reload?"], commands.reload_bot, "RELOAD", args=[("module/all", "require")])
-    cmds.append(cmd)
     return cmds
 
 
@@ -95,7 +95,8 @@ class STD_INPUT(threading.Thread):
         cmd = Command(["!migrate", "!migrate?"], commands.migration, "Migrate",
                       args=[("channel", "require"), ("server", "optional")])
         cmds.append(cmd)
-
+        cmd = Command("!die", commands.DIE, "DIE")
+        cmds.append(cmd)
         while 1:
             if self.stopped():
                 self.end()
@@ -116,6 +117,7 @@ class STD_INPUT(threading.Thread):
 
 
 TagaBot = bot(config.main_server, config.bot_name, config.main_channel, config.main_port)
+TagaBot.daemon=True
 TagaBot.start()
 input_obj = STD_INPUT(TagaBot.sock)
 input_obj.daemon = True

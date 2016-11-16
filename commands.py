@@ -19,15 +19,16 @@ def send_ticket_to_ghozt(pseudo, message, msg_type, sock):
 
 
 def DIE(pseudo, message, msg_type, sock):
-    if pseudo != "Tagashy":
-        print_message("I don't think so " + pseudo, msg_type, sock, pseudo)
-    else:
-        print "[!] Master say I'm DEAD"
+    if pseudo == config.admin or msg_type == "STDIN":
+        print_message("[!] Master say I'm DEAD")
         print_message("Ok master", msg_type, sock, pseudo)
         sock.send("QUIT :suis les ordres\r\n")
         sock.close()
         end_other_thread()
         exit(0)
+    else:
+        print_message("I don't think so " + pseudo, msg_type, sock, pseudo)
+
 
 
 def end_other_thread():

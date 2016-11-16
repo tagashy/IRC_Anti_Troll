@@ -1,8 +1,6 @@
 import json
-import os
 import random
 import shutil
-import threading
 from subprocess import *
 
 import requests
@@ -32,25 +30,29 @@ class RopThread(threading.Thread):
             else:
                 res = rop(path=fichier)
             if res != -1:
-                url = "http://hastebin.com/"
-                r = requests.post(url + "documents", data=res)
-                print_message(r.text)
-                data = json.loads(r.text)
-                if "key" in data:
-                    print_message("url of ROP: " + url + data["key"], self.msg_type, self.sock, self.pseudo)
-                else:
-                    print_message("ERROR", self.msg_type, self.sock, self.pseudo)
-                os.remove(fichier)
+                self.send_result(res,fichier)
+
+
+    def send_result(self,content,fichier):
+        url = "http://hastebin.com/"
+        r = requests.post(url + "documents", data=content)
+        print_message(r.text)
+        data = json.loads(r.text)
+        if "key" in data:
+            print_message("url of ROP: " + url + data["key"], self.msg_type, self.sock, self.pseudo)
+        else:
+            print_message("ERROR AFTER POST", self.msg_type, self.sock, self.pseudo)
+        os.remove(fichier)
 
     def get_file(self, path):
-        fichier = str(name_gen.randint(0, 1000 * 1000)) + ".bin"
-        get_type = path.split(":")[0]
-        print_message(get_type)
-        for handle in self.handlers:
-            if handle.keyword == get_type:
-                if handle.function(path, fichier):
-                    return fichier
-        return -1
+            fichier = str(name_gen.randint(0, 1000 * 1000)) + ".bin"
+            get_type = path.split(":")[0]
+            print_message(get_type)
+            for handle in self.handlers:
+                if handle.keyword == get_type:
+                    if handle.function(path, fichier):
+                        return fichier
+            return -1
 
 
 def rop(params="--ropchain", path="/root/root-me/app-sys/ch32"):
