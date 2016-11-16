@@ -35,13 +35,13 @@ class RopThread(threading.Thread):
 
     def send_result(self,contents,fichier):
         content=""
-        ROP_START=False
+        rop_start=False
         for line in contents:
-            if ROP_START:
+            if rop_start:
                 content+=line
             elif "ROP chain generation" in line:
                 content+=line
-                ROP_START=True
+                rop_start=True
         print_message(content)
         if content!= "":
             url = "http://hastebin.com/"
@@ -52,6 +52,8 @@ class RopThread(threading.Thread):
                 print_message("url of ROP: " + url + data["key"], self.msg_type, self.sock, self.pseudo)
             else:
                 print_message("ERROR AFTER POST", self.msg_type, self.sock, self.pseudo)
+        else:
+            print_message("content is None")
         os.remove(fichier)
 
     def get_file(self, path):
