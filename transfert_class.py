@@ -34,7 +34,7 @@ class Transferrer(threading.Thread):
             send_public_message(message, self.send_sock)
 
     def run(self):
-        invisible_cara = 31  # caracter to escape highlights
+        invisible_cara = 07  # caracter to escape highlights
         self.users, self.recv_sock = utils.create_irc_socket(self.addr, self.name, self.channel, self.port)
         if self.recv_sock == -1:
             self.error = "Throttled"
