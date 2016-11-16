@@ -36,6 +36,11 @@ def get_scp_file(path, fichier, user=None, password=None):
         path = path.replace("scp:", "")
         server = path.split(":")[0]
         port = path.split(":")[1].split("/")[0]
+        data=path.split("/")[1]
+        path=""
+        for i in xrange(1, len(data) - 1):
+            path+=data[i]+"/"
+        path+=data[len(data) - 1]
         try :
             port = int(port)
         except:
@@ -44,6 +49,9 @@ def get_scp_file(path, fichier, user=None, password=None):
         client.load_system_host_keys()
         client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         client.connect(server, port, user, password)
+        ssh = paramiko.createSSHClient(server, port, user, password)
+        scp = paramiko.SCPClient(ssh.get_transport())
+        scp.get(path)
         return 1
     except:
         return -1
