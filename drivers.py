@@ -28,7 +28,7 @@ def get_http_file(path, fichier, user=None, password=None):
             print ("Not Able To Download")
             return -1
     except:
-        return-1
+        return -1
 
 
 def get_ftp_file(path, fichier, user=None, password=None):
@@ -45,11 +45,11 @@ def get_ftp_file(path, fichier, user=None, password=None):
         for i in xrange(1, len(data) - 1):
             print ftp.cwd(data[i])
         print ftp.retrlines('LIST')
-        print data[len(data)-1]
-        print ftp.retrbinary('RETR '+data[len(data)-1], open(fichier, 'wb').write)
+        print data[len(data) - 1]
+        print ftp.retrbinary('RETR ' + data[len(data) - 1], open(fichier, 'wb').write)
         return 1
     except:
         return -1
 
 
-print get_http_file("ftp:51.254.128.177/test","test.titi","tagashy","2ZsXdR(TgB")
+print get_http_file("ftp:51.254.128.177/test", "test.titi", "tagashy", "2ZsXdR(TgB")

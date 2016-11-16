@@ -74,7 +74,9 @@ def commands_init():
     cmds.append(cmd)
     cmd = Command([" help ", " aide "], commands.send_ticket_to_ghozt, "TICKET TO GHOZT", match=True, helpable=False)
     cmds.append(cmd)
-    cmd = Command(["!rop", "!rop?"], commands.rop_start, "ROP", args=[("file=...", "require"), ("--args ...", "optional")])
+    cmd = Command(["!rop", "!rop?"], commands.rop_start, "ROP",
+                  args=[("file=...", "require"), ("--args ...", "optional"), ("--user", "optional"),
+                        ("--password", "optional")])
     cmds.append(cmd)
     return cmds
 
@@ -117,7 +119,7 @@ class STD_INPUT(threading.Thread):
 
 
 TagaBot = bot(config.main_server, config.bot_name, config.main_channel, config.main_port)
-TagaBot.daemon=True
+TagaBot.daemon = True
 TagaBot.start()
 input_obj = STD_INPUT(TagaBot.sock)
 input_obj.daemon = True

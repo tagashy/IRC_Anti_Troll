@@ -21,7 +21,7 @@ def command_loop(pseudo, message, msg_type, sock, cmds):
             if message == cmd.keyword:
 
                 if "?" in message:
-                    help_cmd(cmd,msg_type,pseudo,sock)
+                    help_cmd(cmd, msg_type, pseudo, sock)
                 else:
                     print_message("[!] function " + cmd.name + " called by " + pseudo)
                     cmd.function(pseudo, message, msg_type, sock)

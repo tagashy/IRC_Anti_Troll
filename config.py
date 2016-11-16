@@ -4,5 +4,5 @@ class config:
     main_server = "irc.root-me.org"
     main_port = 6667
     debug = False
-    log=True
-    admin="Tagashy"
+    log = True
+    admin = "Tagashy"
