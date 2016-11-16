@@ -36,9 +36,9 @@ class RopThread(threading.Thread):
     def send_result(self,contents,fichier):
         content=""
         rop_start=False
-        for line in contents:
+        for line in contents.split("\n"):
             if rop_start:
-                content+=line
+                content+=line+"\n"
             elif "ROP chain generation" in line:
                 content+=line
                 rop_start=True
@@ -78,7 +78,6 @@ def rop(params="--ropchain", path="/root/root-me/app-sys/ch32"):
         args.append(arg)
     args.append("--binary")
     args.append(path)
-    print args
     proc = Popen(args, stdout=PIPE)
     outs = ""
     while proc.poll() is None:
