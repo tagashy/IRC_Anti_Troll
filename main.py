@@ -58,7 +58,7 @@ def commands_init():
     cmd = Command("!die", commands.DIE, "DIE")
     cmds.append(cmd)
     cmd = Command(["!transfert", "!transfert?"], commands.transfert_message_from_other_place, "Tranfert",
-                  args=[("server", "require"), ("#channel", "require")])
+                  args=[("server", "require"), ("#channel", "require"),("public/publique","optional")])
     cmds.append(cmd)
     cmd = Command("!list_transfert", commands.list_transferer, "List Tranfert")
     cmds.append(cmd)
@@ -76,7 +76,7 @@ def commands_init():
     cmds.append(cmd)
     cmd = Command(["!rop", "!rop?"], commands.rop_start, "ROP",
                   args=[("file=...", "require"), ("--args ...", "optional"), ("--user=...", "optional"),
-                        ("--password=...", "optional")])
+                        ("--password=...", "optional(never use it on public channel!!!)")])
     cmds.append(cmd)
     return cmds
 

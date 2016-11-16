@@ -78,7 +78,8 @@ class Transferrer(threading.Thread):
                             chr(3) + str(self.couleur) + "User " + user[0:1] + chr(invisible_cara) + user[
                                                                                                      1:] + " has join channel")
                     elif msg_type == "QUIT":
-                        self.users.remove(user)
+                        if user in self.users:
+                            self.users.remove(user)
                         self.send_message(
                             chr(3) + str(self.couleur) + "User " + user[0:1] + chr(invisible_cara) + user[
                                                                                                      1:] + " has quit server with msg : " + message)

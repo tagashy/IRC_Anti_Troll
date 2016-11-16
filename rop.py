@@ -1,13 +1,12 @@
 import json
+import os
 import random
-from subprocess import *
 import threading
+from subprocess import Popen, PIPE
 import drivers
 from command_class import *
-import os
 
-name_gen = random.Random()
-name_gen.seed()
+
 
 
 class RopThread(threading.Thread):
@@ -117,15 +116,6 @@ def parse(message):
     return fichier, args, user, password
 
 
-def init_protocol_handler():
-    handlers = []
-    handler = Command("http", drivers.get_http_file, "HTTP")
-    handlers.append(handler)
-    handler = Command("local", drivers.get_local_file, "LOCAL")
-    handlers.append(handler)
-    handler = Command("ftp", drivers.get_ftp_file, "FTP")
-    handlers.append(handler)
-    return handlers
 
 
 if __name__ == '__main__':
