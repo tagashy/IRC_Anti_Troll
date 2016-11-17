@@ -33,6 +33,18 @@ class Transferrer(threading.Thread):
         else:
             send_public_message(message, self.send_sock)
 
+    def last_seen(self, username):
+        for user in self.users:
+            if username == user.username:
+                return user.lastSeen,user.digiTime
+        return -1,-1
+
+    def update_user_last_seen(self, pseudo):
+        for user in self.users:
+            if pseudo == user.username:
+                user.update_last_seen()
+                break
+
     def run(self):
         invisible_cara = 07  # caracter to escape highlights
         self.users, self.recv_sock = utils.create_irc_socket(self.addr, self.name, self.channel, self.port)
@@ -60,37 +72,38 @@ class Transferrer(threading.Thread):
                 elif res.strip() != "":
                     if config.debug:
                         print_message(res)
-                    user, user_account, ip, msg_type, message, target = new_parsing(res)
+                    pseudo, user_account, ip, msg_type, message, target = new_parsing(res)
                     if msg_type == "PUBMSG":
-
+                        self.update_user_last_seen(pseudo)
                         self.send_message(
                             chr(3) + str(
-                                self.couleur) + self.channel + " : " + user + ">" + message,
+                                self.couleur) + self.channel + " : " + pseudo + ">" + message,
                         )
                     elif msg_type == "PRIVMSG":
+                        self.update_user_last_seen(pseudo)
                         self.send_message(
-                            chr(3) + str(self.couleur) + "Private message from user " + user[0:1] + chr(
-                                invisible_cara) + user[
+                            chr(3) + str(self.couleur) + "Private message from user " + pseudo[0:1] + chr(
+                                invisible_cara) + pseudo[
                                                   1:] + ">" + message)
                     elif msg_type == "JOIN":
-                        self.users.append(user)
+                        self.users.append(pseudo)
                         self.send_message(
-                            chr(3) + str(self.couleur) + "User " + user[0:1] + chr(invisible_cara) + user[
-                                                                                                     1:] + " has join channel")
+                            chr(3) + str(self.couleur) + "User " + pseudo[0:1] + chr(invisible_cara) + pseudo[
+                                                                                                       1:] + " has join channel")
                     elif msg_type == "QUIT":
-                        if user in self.users:
-                            self.users.remove(user)
+                        if pseudo in self.users:
+                            self.users.remove(pseudo)
                         self.send_message(
-                            chr(3) + str(self.couleur) + "User " + user[0:1] + chr(invisible_cara) + user[
-                                                                                                     1:] + " has quit server with msg : " + message)
+                            chr(3) + str(self.couleur) + "User " + pseudo[0:1] + chr(invisible_cara) + pseudo[
+                                                                                                       1:] + " has quit server with msg : " + message)
                     elif msg_type == "PART":
-                        if user in self.users:
-                            self.users.remove(user)
-                        elif "@" + user in self.users:
-                            self.users.remove("@" + user)
+                        if pseudo in self.users:
+                            self.users.remove(pseudo)
+                        elif "@" + pseudo in self.users:
+                            self.users.remove("@" + pseudo)
                         self.send_message(
-                            chr(3) + str(self.couleur) + "User " + user[0:1] + chr(invisible_cara) + user[
-                                                                                                     1:] + " has quit channel with msg : " + message)
+                            chr(3) + str(self.couleur) + "User " + pseudo[0:1] + chr(invisible_cara) + pseudo[
+                                                                                                       1:] + " has quit channel with msg : " + message)
 
             except timeout:
                 pass
