@@ -151,6 +151,7 @@ def last_time_seen(pseudo, message, msg_type, sock):
                 if digi_time < num_time:
                     last_seen = ret
                     digi_time = num_time
+            print TagaBot,username,ret,num_time
             ret, num_time = TagaBot.last_seen(username)
             if ret != -1:
                 found = True
