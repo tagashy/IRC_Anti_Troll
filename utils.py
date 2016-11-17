@@ -1,8 +1,7 @@
 import re
 from socket import *
-
 from config import config
-
+from user import User
 if config.log:
     import Bot_log
 
@@ -78,7 +77,10 @@ def parse_name_list(msg, name_list_reg):
     if name_list_res:
         name_list = name_list_res.group(0)
         names = name_list.split()
-        return names
+        users=[]
+        for name in names:
+            users.append(User(name))
+        return users
 
 
 def cut_at_cara(string, c):
