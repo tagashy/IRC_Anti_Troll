@@ -21,6 +21,7 @@ class bot(threading.Thread):
         self.port = port
 
     def last_seen(self, username):
+        print self.users
         for user in self.users:
             if username == user.username:
                 return user.lastSeen, user.digiTime
@@ -90,7 +91,7 @@ def commands_init():
                   args=[("file=...", "require"), ("--args ...", "optional"), ("--user=...", "optional"),
                         ("--password=...", "optional(never use it on public channel!!!)")])
     cmds.append(cmd)
-    cmd=Command(["!last_seen","!last_seen?"],last_seen,"LAST SEEN",args=[("pseudo","require/repteable")])
+    cmd=Command(["!last_time_seen","!last_time_seen?"], last_time_seen, "LAST SEEN", args=[("pseudo", "require/repteable")])
     cmds.append(cmd)
     return cmds
 
@@ -132,7 +133,7 @@ class StdInput(threading.Thread):
         return self._stop.isSet()
 
 
-def last_seen(pseudo, message, msg_type, sock):
+def last_time_seen(pseudo, message, msg_type, sock):
 
     param = message.split()
     if len(param) > 1:
@@ -149,8 +150,6 @@ def last_seen(pseudo, message, msg_type, sock):
                 if digi_time < num_time:
                     last_time_seen = ret
                     digi_time = num_time
-            print TagaBot.__class__
-            print username.__class__
             ret, num_time = TagaBot.last_seen(username)
             if ret != -1:
                 found = True
