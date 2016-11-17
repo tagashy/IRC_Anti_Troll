@@ -21,8 +21,8 @@ class bot(threading.Thread):
         self.port = port
 
     def last_seen(self, username):
-        print self.users
         for user in self.users:
+            print "[D] user:"+user
             if username == user.username:
                 return user.lastSeen, user.digiTime
 
@@ -150,7 +150,7 @@ def last_time_seen(pseudo, message, msg_type, sock):
                 if digi_time < num_time:
                     last_seen = ret
                     digi_time = num_time
-            print TagaBot, username, ret, num_time
+            print "[D]",TagaBot, username, ret, num_time
             ret, num_time = TagaBot.last_seen(username)
             if ret != -1:
                 found = True
