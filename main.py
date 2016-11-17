@@ -158,7 +158,7 @@ def last_time_seen(pseudo, message, msg_type, sock):
                         last_seen = last
                 if found:
                     print last_seen
-                    ret = "{} seen {}".format(username, last_seen)
+                    ret = "{} has been seen the last time at: {}".format(username, last_seen)
                 else:
                     ret = "{} has never been seen".format(username)
                 print_message(ret, msg_type, sock, pseudo)
