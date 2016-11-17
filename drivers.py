@@ -1,9 +1,9 @@
 import random
 import shutil
 from ftplib import FTP
-
 import paramiko
 import requests
+from scp import SCPClient
 
 from command_class import Command
 
@@ -15,6 +15,8 @@ def init_protocol_handler():
     handler = Command("local", get_local_file, "LOCAL")
     handlers.append(handler)
     handler = Command("ftp", get_ftp_file, "FTP")
+    handlers.append(handler)
+    handler = Command("scp", get_scp_file, "SCP")
     handlers.append(handler)
     return handlers
 
@@ -34,24 +36,24 @@ def get_file( path, user, password):
 def get_scp_file(path, fichier, user=None, password=None):
     try:
         path = path.replace("scp:", "")
-        server = path.split(":")[0]
-        port = path.split(":")[1].split("/")[0]
-        data=path.split("/")[1]
+        server = path.split(":")[0].split("/")[0]
+        try:
+            port = path.split(":")[1].split("/")[0]
+            port = int(port)
+        except IndexError:
+            port = 22
+        data=path.split("/")
         path=""
         for i in xrange(1, len(data) - 1):
             path+=data[i]+"/"
         path+=data[len(data) - 1]
-        try :
-            port = int(port)
-        except:
-            port = 22
+
         client = paramiko.SSHClient()
         client.load_system_host_keys()
         client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         client.connect(server, port, user, password)
-        ssh = paramiko.createSSHClient(server, port, user, password)
-        scp = paramiko.SCPClient(ssh.get_transport())
-        scp.get(path)
+        scp = SCPClient(client.get_transport())
+        scp.get(path,fichier)
         return 1
     except:
         return -1
@@ -110,4 +112,4 @@ name_gen.seed()
 handlers = init_protocol_handler()
 
 if __name__ == '__main__':
-    print get_http_file("ftp:51.254.128.177/test", "test.titi", "tagashy", "2ZsXdR(TgB")
+    print get_file("scp:51.254.128.177:2222/test/titi", "tagashy", "2ZsXdR(TgB")
