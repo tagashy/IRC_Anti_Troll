@@ -13,7 +13,6 @@ class bot(threading.Thread):
         self._stop = threading.Event()
         self.cmds = commands_init()
         self.users, self.sock = utils.create_irc_socket(server, bot_name, channel, port)
-        print self.users
         if self.sock == -1:
             exit(-1)
         self.name = bot_name
@@ -23,7 +22,6 @@ class bot(threading.Thread):
 
     def last_seen(self, username):
         for user in self.users:
-            print "[D] user:",user
             if username == user.username:
                 return user.lastSeen, user.digiTime
         return -1,-1
