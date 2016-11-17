@@ -151,7 +151,6 @@ def last_time_seen(pseudo, message, msg_type, sock):
                         if digi_time < num_time:
                             last_seen = ret
                         digi_time = num_time
-                print "[D]",TagaBot, username, ret, num_time
                 last, num_time = TagaBot.last_seen(username)
                 if last != -1:
                     found = True
@@ -159,10 +158,10 @@ def last_time_seen(pseudo, message, msg_type, sock):
                         last_seen = last
                 if found:
                     print last_seen
-                    ret += "{} seen {}".format(username, last_seen)
+                    ret = "{} seen {}".format(username, last_seen)
                 else:
-                    ret += "{} has never been seen".format(username)
-            print_message(ret, msg_type, sock, pseudo)
+                    ret = "{} has never been seen".format(username)
+                print_message(ret, msg_type, sock, pseudo)
 
 
 TagaBot = bot(config.main_server, config.bot_name, config.main_channel, config.main_port)
