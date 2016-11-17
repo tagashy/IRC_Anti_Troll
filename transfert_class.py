@@ -1,15 +1,15 @@
 import threading
-
+import user
 import utils
 from commands import *
 from message_parsing import *
 
 
 class Transferrer(threading.Thread):
-    def __init__(self, addr, channel, port, bot_name, send_sock, pseudo=None, couleur=2):
+    def __init__(self, addr, channel, port, bot_name, send_sock,original_chan, pseudo=None, couleur=2):
         threading.Thread.__init__(self)
         self._stop = threading.Event()
-        self.addr = addr
+        self.server = addr
         self.channel = channel
         self.port = port
         self.name = bot_name
@@ -20,7 +20,7 @@ class Transferrer(threading.Thread):
         self.users = None
         self.started = False
         self.error = None
-
+        self.original_chan=original_chan
     def stop(self):
         self._stop.set()
 
@@ -31,13 +31,13 @@ class Transferrer(threading.Thread):
         if self.pseudo is not None:
             send_private_message(message, self.pseudo, self.send_sock)
         else:
-            send_public_message(message, self.send_sock)
+            send_private_message(message, self.original_chan, self.send_sock)
 
     def last_seen(self, username):
         for user in self.users:
             if username == user.username:
-                return user.lastSeen,user.digiTime
-        return -1,-1
+                return user.lastSeen, user.digiTime
+        return -1, -1
 
     def update_user_last_seen(self, pseudo):
         for user in self.users:
@@ -47,7 +47,7 @@ class Transferrer(threading.Thread):
 
     def run(self):
         invisible_cara = 07  # caracter to escape highlights
-        self.users, self.recv_sock = utils.create_irc_socket(self.addr, self.name, self.channel, self.port)
+        self.users, self.recv_sock = utils.create_irc_socket(self.server, self.name, self.channel, self.port)
         if self.recv_sock == -1:
             self.error = "Throttled"
             exit(-1)
@@ -86,10 +86,10 @@ class Transferrer(threading.Thread):
                                 invisible_cara) + pseudo[
                                                   1:] + ">" + message)
                     elif msg_type == "JOIN":
-                        self.users.append(pseudo)
+                        self.users.append(user.User(pseudo,self.channel,self.server))
                         self.send_message(
                             chr(3) + str(self.couleur) + "User " + pseudo[0:1] + chr(invisible_cara) + pseudo[
-                                                                                                       1:] + " has join channel")
+                                                                                                       1:] + " has join channel "+self.channel)
                     elif msg_type == "QUIT":
                         if pseudo in self.users:
                             self.users.remove(pseudo)

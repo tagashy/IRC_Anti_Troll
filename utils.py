@@ -1,7 +1,9 @@
 import re
 from socket import *
+
 from config import config
 from user import User
+
 if config.log:
     import Bot_log
 
@@ -47,17 +49,17 @@ def create_irc_socket(addr, bot_name, channel, port=6667):
             print_message(res)
         if " 353 " in res:
             print_message("[!] creation of user list")
-            users += parse_name_list(res, name_list_reg)
+            users += parse_name_list(res, name_list_reg,channel,addr)
             if config.debug:
                 print_message("[D] users of channel {}:{}".format(channel, users))
     return users, recv_sock
 
 
-def print_message(message, msg_type="STDIN", sock=None, pseudo=None):
+def print_message(message, msg_type="STDIN", sock=None, pseudo=None, channel=None):
     if msg_type == "PRIVMSG":
         send_private_message(message, pseudo, sock)
     elif msg_type == "PUBMSG":
-        send_public_message(message, sock)
+        send_private_message(message, channel, sock)
     elif msg_type == "STDIN":
         print message
     if config.log:
@@ -72,14 +74,14 @@ def send_private_message(message, pseudo, sock):
     sock.send("PRIVMSG " + pseudo + " :" + message + "\r\n")
 
 
-def parse_name_list(msg, name_list_reg):
+def parse_name_list(msg, name_list_reg,channel="UNKNOWN",server="UNKNOWN"):
     name_list_res = name_list_reg.search(msg)
     if name_list_res:
         name_list = name_list_res.group(0)
         names = name_list.split()
-        users=[]
+        users = []
         for name in names:
-            users.append(User(name))
+            users.append(User(name,channel,server))
         return users
 
 
