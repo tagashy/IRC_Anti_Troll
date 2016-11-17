@@ -133,7 +133,7 @@ class StdInput(threading.Thread):
 
 
 def last_seen(pseudo, message, msg_type, sock):
-    global TagaBot
+    print TagaBot.__class__
     param = message.split()
     if len(param) > 1:
         ret = "user(s) was/were last seen at:"
