@@ -1,21 +1,22 @@
 import json
 import os
-import requests
 import threading
 from subprocess import Popen, PIPE
+
+import requests
+
 import drivers
 from command_class import *
 
 
-
-
 class RopThread(threading.Thread):
-    def __init__(self, pseudo, message, msg_type, sock):
+    def __init__(self, pseudo, message, msg_type, sock, channel):
         threading.Thread.__init__(self)
         self.pseudo = pseudo
         self.msg_type = msg_type
         self.sock = sock
         self.message = message
+        self.channel = channel
 
     def run(self):
         fichier, params, user, password = parse(self.message)
@@ -28,11 +29,11 @@ class RopThread(threading.Thread):
             if res > 0:
                 self.send_result(res, fichier)
             elif res == -1:
-                print_message("No driver for this type of file", self.msg_type, self.sock, self.pseudo)
+                print_message("No driver for this type of file", self.msg_type, self.sock, self.pseudo, self.channel)
             elif res == -2:
                 print_message(
                     "ERROR during recuperation of file (you may need to provide credential depending of the protocol)",
-                    self.msg_type, self.sock, self.pseudo)
+                    self.msg_type, self.sock, self.pseudo, self.channel)
 
     def send_result(self, contents, fichier):
         content = ""
@@ -50,14 +51,12 @@ class RopThread(threading.Thread):
             print_message(r.text)
             data = json.loads(r.text)
             if "key" in data:
-                print_message("url of ROP: " + url + data["key"], self.msg_type, self.sock, self.pseudo)
+                print_message("url of ROP: " + url + data["key"], self.msg_type, self.sock, self.pseudo, self.channel)
             else:
-                print_message("ERROR AFTER POST", self.msg_type, self.sock, self.pseudo)
+                print_message("ERROR AFTER POST", self.msg_type, self.sock, self.pseudo, self.channel)
         else:
             print_message("content is None")
         os.remove(fichier)
-
-
 
 
 def rop(params="--ropchain", path="/root/root-me/app-sys/ch32"):
@@ -105,9 +104,7 @@ def parse(message):
     return fichier, args, user, password
 
 
-
-
 if __name__ == '__main__':
-    r = RopThread(None, "!rop file=http://challenge01.root-me.org/cracking/ch15/ch15.exe", "STDIN", None)
+    r = RopThread(None, "!rop file=http://challenge01.root-me.org/cracking/ch15/ch15.exe", "STDIN", None, "STDIN")
     r.start()
 # parse("!rop file=/root/root-me/app-sys/ch32")
