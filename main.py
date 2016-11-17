@@ -91,7 +91,7 @@ def commands_init():
                   args=[("file=...", "require"), ("--args ...", "optional"), ("--user=...", "optional"),
                         ("--password=...", "optional(never use it on public channel!!!)")])
     cmds.append(cmd)
-    cmd=Command(["!last_seen","!last_seen?"], last_time_seen, "LAST SEEN", args=[("pseudo", "require/repteable")])
+    cmd = Command(["!last_seen", "!last_seen?"], last_time_seen, "LAST SEEN", args=[("pseudo", "require/repteable")])
     cmds.append(cmd)
     return cmds
 
@@ -134,7 +134,6 @@ class StdInput(threading.Thread):
 
 
 def last_time_seen(pseudo, message, msg_type, sock):
-
     param = message.split()
     if len(param) > 1:
         ret = "user(s) was/were last seen at:"
@@ -143,7 +142,7 @@ def last_time_seen(pseudo, message, msg_type, sock):
             found = False
             last_seen = ""
             digi_time = 0
-            ret= num_time=""
+            ret = num_time = ""
             for tr in commands.transferrer_list:
                 ret, num_time = tr.last_seen(username)
                 if ret != -1:
@@ -151,7 +150,7 @@ def last_time_seen(pseudo, message, msg_type, sock):
                 if digi_time < num_time:
                     last_seen = ret
                     digi_time = num_time
-            print TagaBot,username,ret,num_time
+            print TagaBot, username, ret, num_time
             ret, num_time = TagaBot.last_seen(username)
             if ret != -1:
                 found = True
