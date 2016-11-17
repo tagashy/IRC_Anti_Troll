@@ -133,7 +133,7 @@ class StdInput(threading.Thread):
 
 
 def last_seen(pseudo, message, msg_type, sock):
-    print TagaBot.__class__
+
     param = message.split()
     if len(param) > 1:
         ret = "user(s) was/were last seen at:"
@@ -149,6 +149,8 @@ def last_seen(pseudo, message, msg_type, sock):
                 if digi_time < num_time:
                     last_time_seen = ret
                     digi_time = num_time
+            print TagaBot.__class__
+            print username.__class__
             ret, num_time = TagaBot.last_seen(username)
             if ret != -1:
                 found = True
