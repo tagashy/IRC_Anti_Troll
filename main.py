@@ -13,6 +13,7 @@ class bot(threading.Thread):
         self._stop = threading.Event()
         self.cmds = commands_init()
         self.users, self.sock = utils.create_irc_socket(server, bot_name, channel, port)
+        print self.users
         if self.sock == -1:
             exit(-1)
         self.name = bot_name
@@ -22,9 +23,10 @@ class bot(threading.Thread):
 
     def last_seen(self, username):
         for user in self.users:
-            print "[D] user:"+user
+            print "[D] user:",user
             if username == user.username:
                 return user.lastSeen, user.digiTime
+        return -1,-1
 
     def update_user_last_seen(self, pseudo):
         for user in self.users:
@@ -136,31 +138,33 @@ class StdInput(threading.Thread):
 def last_time_seen(pseudo, message, msg_type, sock):
     param = message.split()
     if len(param) > 1:
-        ret = "user(s) was/were last seen at:"
-        for i in xrange(len(param)):
+        ret = ""#"user(s) was/were last seen at:"
+        for i in xrange(1,len(param)):
             username = param[i]
-            found = False
-            last_seen = ""
-            digi_time = 0
-            ret = num_time = ""
-            for tr in commands.transferrer_list:
-                ret, num_time = tr.last_seen(username)
-                if ret != -1:
+            if username != "":
+                found = False
+                last_seen = ""
+                digi_time = 0
+                last = num_time = ""
+                for tr in commands.transferrer_list:
+                    last, num_time = tr.last_seen(username)
+                    if last != -1:
+                        found = True
+                        if digi_time < num_time:
+                            last_seen = ret
+                        digi_time = num_time
+                print "[D]",TagaBot, username, ret, num_time
+                last, num_time = TagaBot.last_seen(username)
+                if last != -1:
                     found = True
-                if digi_time < num_time:
-                    last_seen = ret
-                    digi_time = num_time
-            print "[D]",TagaBot, username, ret, num_time
-            ret, num_time = TagaBot.last_seen(username)
-            if ret != -1:
-                found = True
-            if digi_time < num_time:
-                last_seen = ret
-            if found:
-                ret += "{} seen {}".format(username, last_seen)
-            else:
-                ret += "{} has never been seen".format(username)
-        print_message(ret, msg_type, sock, pseudo)
+                    if digi_time < num_time:
+                        last_seen = last
+                if found:
+                    print last_seen
+                    ret += "{} seen {}".format(username, last_seen)
+                else:
+                    ret += "{} has never been seen".format(username)
+            print_message(ret, msg_type, sock, pseudo)
 
 
 TagaBot = bot(config.main_server, config.bot_name, config.main_channel, config.main_port)
