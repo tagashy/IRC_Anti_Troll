@@ -20,6 +20,17 @@ class bot(threading.Thread):
         self.server = server
         self.port = port
 
+    def last_seen(self, username):
+        for user in self.users:
+            if username == user.username:
+                return user.lastSeen, user.digiTime
+
+    def update_user_last_seen(self, pseudo):
+        for user in self.users:
+            if pseudo == user.username:
+                user.update_last_seen()
+                break
+
     def run(self):
         print "[!] Starting {} on server {}:{} in channel {}".format(self.name, self.server, self.port, self.channel)
         self.main_loop()
@@ -47,6 +58,7 @@ class bot(threading.Thread):
                     if config.debug:
                         print line
                     pseudo, user_account, ip, msg_type, content, target = message_parsing.new_parsing(line)
+                    self.update_user_last_seen(pseudo)
                     if not command_loop(pseudo, content, msg_type, self.sock, self.cmds):
                         print_message("[" + msg_type + "] USER: " + pseudo + " send: " + content)
 
@@ -58,7 +70,7 @@ def commands_init():
     cmd = Command("!die", commands.DIE, "DIE")
     cmds.append(cmd)
     cmd = Command(["!transfert", "!transfert?"], commands.transfert_message_from_other_place, "Tranfert",
-                  args=[("server", "require"), ("#channel", "require"),("public/publique","optional")])
+                  args=[("server", "require"), ("#channel", "require"), ("public/publique", "optional")])
     cmds.append(cmd)
     cmd = Command("!list_transfert", commands.list_transferer, "List Tranfert")
     cmds.append(cmd)
@@ -78,10 +90,12 @@ def commands_init():
                   args=[("file=...", "require"), ("--args ...", "optional"), ("--user=...", "optional"),
                         ("--password=...", "optional(never use it on public channel!!!)")])
     cmds.append(cmd)
+    cmd=Command(["!last_seen","!last_seen?"],last_seen,"LAST SEEN",args=[("pseudo","require/repteable")])
+    cmds.append(cmd)
     return cmds
 
 
-class STD_INPUT(threading.Thread):
+class StdInput(threading.Thread):
     def __init__(self, sock):
         threading.Thread.__init__(self)
         self._stop = threading.Event()
@@ -118,10 +132,38 @@ class STD_INPUT(threading.Thread):
         return self._stop.isSet()
 
 
+def last_seen(pseudo, message, msg_type, sock):
+    param = message.split()
+    if len(param) > 1:
+        ret = "user(s) was/were last seen at:"
+        for i in xrange(len(param)):
+            username = param[i]
+            found = False
+            last_time_seen = ""
+            digi_time = 0
+            for tr in commands.transferrer_list:
+                ret, num_time = tr.last_seen(username)
+                if ret != -1:
+                    found = True
+                if digi_time < num_time:
+                    last_time_seen = ret
+                    digi_time = num_time
+            ret, num_time = TagaBot.last_seen(username)
+            if ret != -1:
+                found = True
+            if digi_time < num_time:
+                last_time_seen = ret
+            if found:
+                ret += "{} seen {}".format(username, last_time_seen)
+            else:
+                ret += "{} has never been seen".format(username)
+        print_message(ret, msg_type, sock, pseudo)
+
+
 TagaBot = bot(config.main_server, config.bot_name, config.main_channel, config.main_port)
 TagaBot.daemon = True
 TagaBot.start()
-input_obj = STD_INPUT(TagaBot.sock)
+input_obj = StdInput(TagaBot.sock)
 input_obj.daemon = True
 input_obj.start()
 TagaBot.join()

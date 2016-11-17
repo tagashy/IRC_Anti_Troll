@@ -371,7 +371,7 @@ def migration(pseudo, message, msg_type, sock):
 
 
 def reload_bot(pseudo, message, msg_type, sock):
-    param = message.split(" ")
+    param = message.split()
     if len(param) == 2:
         if param[1] == "all":
             print_message("starting the reload", msg_type, sock, pseudo)
