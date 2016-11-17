@@ -91,7 +91,7 @@ def commands_init():
                   args=[("file=...", "require"), ("--args ...", "optional"), ("--user=...", "optional"),
                         ("--password=...", "optional(never use it on public channel!!!)")])
     cmds.append(cmd)
-    cmd=Command(["!last_time_seen","!last_time_seen?"], last_time_seen, "LAST SEEN", args=[("pseudo", "require/repteable")])
+    cmd=Command(["!last_seen","!last_seen?"], last_time_seen, "LAST SEEN", args=[("pseudo", "require/repteable")])
     cmds.append(cmd)
     return cmds
 
@@ -141,22 +141,23 @@ def last_time_seen(pseudo, message, msg_type, sock):
         for i in xrange(len(param)):
             username = param[i]
             found = False
-            last_time_seen = ""
+            last_seen = ""
             digi_time = 0
+            ret= num_time=""
             for tr in commands.transferrer_list:
                 ret, num_time = tr.last_seen(username)
                 if ret != -1:
                     found = True
                 if digi_time < num_time:
-                    last_time_seen = ret
+                    last_seen = ret
                     digi_time = num_time
             ret, num_time = TagaBot.last_seen(username)
             if ret != -1:
                 found = True
             if digi_time < num_time:
-                last_time_seen = ret
+                last_seen = ret
             if found:
-                ret += "{} seen {}".format(username, last_time_seen)
+                ret += "{} seen {}".format(username, last_seen)
             else:
                 ret += "{} has never been seen".format(username)
         print_message(ret, msg_type, sock, pseudo)
