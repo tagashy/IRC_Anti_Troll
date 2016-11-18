@@ -98,10 +98,10 @@ def check_not_already_use_transferer(server_addr, channel, external_port, target
     for tr in transferrer_list:
         if config.debug:
             print_message(
-                "[D] {} {} {} {} {} {} {} {}".format(server_addr, channel, external_port, tr.addr, tr.channel, tr.port,
+                "[D] {} {} {} {} {} {} {} {}".format(server_addr, channel, external_port, tr.server, tr.channel, tr.port,
                                                      tr.pseudo, target))
             print_message("[D] {}".format(tr.pseudo == target))
-        if check_valid_server(server_addr, channel, external_port, tr.addr, tr.channel,
+        if check_valid_server(server_addr, channel, external_port, tr.server, tr.channel,
                               tr.port) and tr.pseudo == target:
             return 1
 
@@ -165,7 +165,7 @@ def check_valid_server(server_addr, channel, external_port, comp_serv=config.mai
 def list_transferer(pseudo, message, msg_type, sock, channel):
     print_message("List of transferer:", msg_type, sock, pseudo, channel)
     for tr in transferrer_list:
-        print_message("{} on {} in channel {}".format(tr.name, tr.addr, tr.channel), msg_type, sock, pseudo, channel)
+        print_message("{} on {} in channel {}".format(tr.name, tr.server, tr.channel), msg_type, sock, pseudo, channel)
 
 
 def suppress_transferrer(pseudo, message, msg_type, sock, channel):
@@ -236,7 +236,7 @@ def start_rpg(pseudo, message, msg_type, sock, channel):
 def list_rpg(pseudo, message, msg_type, sock, channel):
     print_message("List of RPG:", msg_type, sock, pseudo, channel)
     for rpg in rpg_list:
-        print_message("{} on {} in channel {}".format(rpg.name, rpg.addr, rpg.channel), msg_type, sock, pseudo, channel)
+        print_message("{} on {} in channel {}".format(rpg.name, rpg.server, rpg.channel), msg_type, sock, pseudo, channel)
 
 
 def stop_rpg(pseudo, message, msg_type, sock, channel):
@@ -256,7 +256,7 @@ def stop_rpg(pseudo, message, msg_type, sock, channel):
             return
         tr_stopped = False
         for rpg_game in rpg_list:
-            if rpg_game.port == port and rpg_game.addr == server_addr and rpg_game.channel == param[2]:
+            if rpg_game.port == port and rpg_game.server == server_addr and rpg_game.channel == param[2]:
                 rpg_game.stop()
                 tr_stopped = True
                 print_message("[!] RPG " + rpg_game.channel + " stopped")

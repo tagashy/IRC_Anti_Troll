@@ -6,6 +6,7 @@ class User:
         self.username = username
         self.server=server
         self.channel=channel
+        self.actif=True
         self.lastSeen = time.strftime("%d/%m/%y %H:%M:%S")
         self.digiTime=time.time()
     def update_last_seen(self):
