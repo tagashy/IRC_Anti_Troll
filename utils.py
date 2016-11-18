@@ -2,12 +2,15 @@ import re
 from socket import *
 
 from config import config
-from user import User
+from user_class import User
 
 if config.log:
     import Bot_log
-
     log = Bot_log.Log()
+
+def clean(string):
+    assert isinstance(string,str)
+    return string.replace("..","").replace("/","").replace("\b","").replace("\n","").replace("\r","")
 
 
 def create_irc_socket(addr, bot_name, channel, port=6667):

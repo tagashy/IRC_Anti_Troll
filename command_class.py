@@ -18,7 +18,7 @@ def command_loop(pseudo, message, msg_type, sock, cmds, channel):
         return 1
     for cmd in cmds:
         if isinstance(cmd.keyword, str):
-            if message == cmd.keyword:
+            if message == cmd.keyword or message+"?" == key:
 
                 if "?" in message:
                     help_cmd(cmd, msg_type, pseudo, sock, channel)
@@ -28,7 +28,7 @@ def command_loop(pseudo, message, msg_type, sock, cmds, channel):
                 return 1
         else:
             for key in cmd.keyword:
-                if message.startswith(key + " ") or message == key:
+                if message.startswith(key + " ") or message == key or message+"?" == key:
                     if "?" in message:
                         help_cmd(cmd, msg_type, pseudo, sock, channel)
                     else:
@@ -46,8 +46,9 @@ def command_loop(pseudo, message, msg_type, sock, cmds, channel):
 
 def help_cmd(cmd, msg_type, pseudo, sock, channel):
     ret = cmd.keyword[0]
-    for arg in cmd.args:
-        ret += " <{}|{}>".format(arg[0], arg[1])
+    if cmd.args is not None:
+        for arg in cmd.args:
+            ret += " <{}|{}>".format(arg[0], arg[1])
     print_message(ret, msg_type, sock, pseudo, channel)
 
 

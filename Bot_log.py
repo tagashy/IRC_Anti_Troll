@@ -6,5 +6,5 @@ class Log:
         self.log = open(log_file, "a")
 
     def write(self, message):
-        self.log.write("{}:{}\n".format(time.strftime("%d/%m/%y %M:%H "), message))
+        self.log.write("{}:{}\n".format(time.strftime("%d/%m/%y %M:%H:%S"), message))
         self.log.flush()
