@@ -45,7 +45,10 @@ def command_loop(pseudo, message, msg_type, sock, cmds, channel):
 
 
 def help_cmd(cmd, msg_type, pseudo, sock, channel):
-    ret = cmd.keyword[0]
+    if isinstance(cmd.keyword, str):
+        ret = cmd.keyword
+    else:
+        ret = cmd.keyword[0]
     if cmd.args is not None:
         for arg in cmd.args:
             ret += " <{}|{}>".format(arg[0], arg[1])
