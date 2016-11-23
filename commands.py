@@ -71,9 +71,9 @@ def transfert_message_from_other_place(pseudo, message, msg_type, sock, channel)
         external_bot_name = "user_" + str(num_genrator.randint(1000, 1000 * 1000))
         print_message("[!] name of transferer user:" + external_bot_name)
         if len(param) == 3 or (len(param) == 4 and param[3].lower() != "publique" and param[3].lower() != "public"):
-            transfer = Transferrer(server_addr, param[2], port, external_bot_name, sock,channel, pseudo, couleur=color)
+            transfer = Transferrer(server_addr, param[2], port, external_bot_name, sock, channel, pseudo, couleur=color)
         else:
-            transfer = Transferrer(server_addr, param[2], port, external_bot_name, sock,channel, couleur=color)
+            transfer = Transferrer(server_addr, param[2], port, external_bot_name, sock, channel, couleur=color)
         transfer.start()
         timeout_start = time.time() + 10
         while not transfer.started:
@@ -98,7 +98,8 @@ def check_not_already_use_transferer(server_addr, channel, external_port, target
     for tr in transferrer_list:
         if config.debug:
             print_message(
-                "[D] {} {} {} {} {} {} {} {}".format(server_addr, channel, external_port, tr.server, tr.channel, tr.port,
+                "[D] {} {} {} {} {} {} {} {}".format(server_addr, channel, external_port, tr.server, tr.channel,
+                                                     tr.port,
                                                      tr.pseudo, target))
             print_message("[D] {}".format(tr.pseudo == target))
         if check_valid_server(server_addr, channel, external_port, tr.server, tr.channel,
@@ -236,7 +237,8 @@ def start_rpg(pseudo, message, msg_type, sock, channel):
 def list_rpg(pseudo, message, msg_type, sock, channel):
     print_message("List of RPG:", msg_type, sock, pseudo, channel)
     for rpg in rpg_list:
-        print_message("{} on {} in channel {}".format(rpg.name, rpg.server, rpg.channel), msg_type, sock, pseudo, channel)
+        print_message("{} on {} in channel {}".format(rpg.name, rpg.server, rpg.channel), msg_type, sock, pseudo,
+                      channel)
 
 
 def stop_rpg(pseudo, message, msg_type, sock, channel):
@@ -329,6 +331,9 @@ def start_bot(pseudo, message, msg_type, sock, channel):
 
 def last_time_seen(pseudo, message, msg_type, sock, channel):
     param = message.split()
+    channel_user = "NONE"
+    server = "NONE"
+    user_actif = False
     if len(param) > 1:
         for i in xrange(1, len(param)):
             username = param[i]
@@ -337,28 +342,37 @@ def last_time_seen(pseudo, message, msg_type, sock, channel):
                 last_seen = ""
                 digi_time = 0
                 for tr in transferrer_list:
-                    last, num_time = tr.last_seen(username)
+                    last, num_time, actif = tr.last_seen(username)
                     if last != -1:
                         found = True
                         if digi_time < num_time:
+                            user_actif = actif
                             last_seen = last
                             digi_time = num_time
                             channel_user = tr.channel
                             server = tr.server
                 for bot in bot_list:
-                    last, num_time = bot.last_seen(username)
+                    last, num_time, actif = bot.last_seen(username)
                     if last != -1:
                         found = True
                         if digi_time < num_time:
+                            user_actif = actif
                             last_seen = last
                             digi_time = num_time
                             channel_user = bot.channel
                             server = bot.server
                 if found:
                     print last_seen
-                    ret = "{} has been seen the last time on server {} in channel {} at: {}".format(username, server,
-                                                                                                    channel_user,
-                                                                                                    last_seen)
+                    if not user_actif:
+                        ret = "{} has been seen the last time on server {} in channel {} at: {}".format(username,
+                                                                                                        server,
+                                                                                                        channel_user,
+                                                                                                        last_seen)
+                    else:
+                        ret = "{} has been actif the last time on server {} in channel {} at: {}".format(username,
+                                                                                                         server,
+                                                                                                         channel_user,
+                                                                                                         last_seen)
                 else:
                     ret = "{} has never been seen".format(username)
                 print_message(ret, msg_type, sock, pseudo, channel)
