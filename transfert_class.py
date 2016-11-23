@@ -9,7 +9,6 @@ class Transferrer(Irc_Class.IRC):
         Irc_Class.IRC.__init__(self, server, channel, port, bot_name)
         self.pseudo = pseudo
         self.send_sock = send_sock
-        self.sock = None
         self.couleur = couleur
         self.original_chan = original_chan
 
@@ -21,6 +20,7 @@ class Transferrer(Irc_Class.IRC):
 
     def main_loop(self):
         invisible_cara = 07  # caracter to escape highlights
+        self.sock.settimeout(2)
         while 1:
             if self.stopped():
                 self.sock.send("QUIT : s'enfuis\r\n")
