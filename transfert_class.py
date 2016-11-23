@@ -42,7 +42,7 @@ class Transferrer(Irc_Class.IRC):
                         send_res = "Private message from user " + pseudo[0:1] + chr(invisible_cara) + pseudo[
                                                                                                       1:] + ">" + message
                     elif msg_type == "JOIN":
-                        self.users.append(user_class.User(pseudo, self.channel, self.server))
+                        self.add_user(pseudo)
                         send_res = "User " + pseudo[0:1] + chr(invisible_cara) + pseudo[
                                                                                  1:] + " has join channel " + self.channel
                     elif msg_type == "QUIT":

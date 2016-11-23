@@ -29,8 +29,8 @@ class IRC(threading.Thread):
     def last_seen(self, username):
         for user in self.users:
             if username == user.username:
-                return user.lastSeen, user.digiTime
-        return -1, -1
+                return user.lastSeen, user.digiTime, user.actif
+        return -1, -1, -1
 
     def update_user_last_seen(self, pseudo):
         found = False
@@ -42,6 +42,14 @@ class IRC(threading.Thread):
                 break
         if not found:
             self.users.append(user_class.User(pseudo))
+
+    def add_user(self, pseudo):
+        for user in self.users:
+            if user.username == pseudo:
+                user.actif = True
+                return
+        self.users.append(user_class.User(pseudo, self.channel, self.server))
+        return
 
     def deactivate_user(self, pseudo):
         for user in self.users:
