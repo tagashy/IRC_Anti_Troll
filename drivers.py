@@ -1,6 +1,7 @@
 import random
 import shutil
 from ftplib import FTP
+
 import paramiko
 import requests
 from scp import SCPClient
@@ -21,7 +22,7 @@ def init_protocol_handler():
     return handlers
 
 
-def get_file( path, user, password):
+def get_file(path, user, password):
     fichier = str(name_gen.randint(0, 1000 * 1000)) + ".bin"
     get_type = path.split(":")[0]
     for handle in handlers:
@@ -42,20 +43,22 @@ def get_scp_file(path, fichier, user=None, password=None):
             port = int(port)
         except IndexError:
             port = 22
-        data=path.split("/")
-        path=""
+        data = path.split("/")
+        path = ""
         for i in xrange(1, len(data) - 1):
-            path+=data[i]+"/"
-        path+=data[len(data) - 1]
+            path += data[i] + "/"
+        path += data[len(data) - 1]
 
         client = paramiko.SSHClient()
         client.load_system_host_keys()
         client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         client.connect(server, port, user, password)
         scp = SCPClient(client.get_transport())
-        scp.get(path,fichier)
+        scp.get(path, fichier)
         return 1
-    except:
+    except Exception as e:
+        print "[!] CANNOT GRAB FILE"
+        print "[!] " + str(e)
         return -1
 
 
