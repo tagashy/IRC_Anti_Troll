@@ -10,6 +10,11 @@ class Command:
         self.match = match
         self.args = args
 
+    def __str__(self):
+        return "Command {} activate by {} helpable {} with args {} matchable {}".format(self.name, self.keyword,
+                                                                                        self.help, self.args,
+                                                                                        self.match)
+
 
 def command_loop(pseudo, message, msg_type, sock, cmds, channel):
     if "!help" == message:
@@ -18,8 +23,7 @@ def command_loop(pseudo, message, msg_type, sock, cmds, channel):
         return 1
     for cmd in cmds:
         if isinstance(cmd.keyword, str):
-            if message == cmd.keyword or message+"?" == key:
-
+            if message == cmd.keyword or message + "?" == cmd.keyword:
                 if "?" in message:
                     help_cmd(cmd, msg_type, pseudo, sock, channel)
                 else:
@@ -28,7 +32,7 @@ def command_loop(pseudo, message, msg_type, sock, cmds, channel):
                 return 1
         else:
             for key in cmd.keyword:
-                if message.startswith(key + " ") or message == key or message+"?" == key:
+                if message.startswith(key + " ") or message == key or message + "?" == key:
                     if "?" in message:
                         help_cmd(cmd, msg_type, pseudo, sock, channel)
                     else:
@@ -52,7 +56,8 @@ def help_cmd(cmd, msg_type, pseudo, sock, channel):
     if cmd.args is not None:
         for arg in cmd.args:
             ret += " <{}|{}>".format(arg[0], arg[1])
-    print_message(ret, msg_type, sock, pseudo, channel)
+    if cmd.help:
+        print_message(ret, msg_type, sock, pseudo, channel)
 
 
 def help_cmds(cmds, msg_type, pseudo, sock, channel):

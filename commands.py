@@ -313,11 +313,11 @@ def start_bot(pseudo, message, msg_type, sock, channel):
         bot_name = param[3]
         bot = TagaBot.Bot(bot_name=bot_name, server=server_addr, channel=param[2], port=port)
         bot.start()
-        timeout_start = time.time() + 10
+        timeout_start = time.time() + 30
         while not bot.started:
             if time.time() > timeout_start:
                 bot.stop()
-                print_message("Bot cannot be start in 10 seconds aborting!", msg_type, sock, pseudo, channel)
+                print_message("Bot cannot be start in 30 seconds aborting!", msg_type, sock, pseudo, channel)
                 return -1
             elif bot.error is not None:
                 bot.stop()

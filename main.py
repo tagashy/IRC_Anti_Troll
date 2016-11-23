@@ -22,17 +22,20 @@ class StdInput(threading.Thread):
         cmds.append(cmd)
         cmd = Command("!die", commands.die, "die")
         cmds.append(cmd)
+        del cmd
         while 1:
             if self.stopped():
                 self.end()
             data = raw_input()
             if command_loop("STDIN", data, "STDIN", self.sock, cmds, "STDIN"):
-                print_message("[!] EXECUTED VIA STDIN")
+                print_message("[S] COMMAND SUCESS")
             else:
                 try:
                     exec data
+                    print "[S] EXEC SUCCES"
                 except:
-                    self.sock.send(data)
+                    self.sock.send(data+"\n")
+                    print "[S] SEND SUCCES"
 
     def stop(self):
         self._stop.set()

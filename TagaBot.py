@@ -1,8 +1,6 @@
-import threading
 import Irc_Class
 import commands
 import message_parsing
-import utils
 from command_class import *
 from config import config
 
@@ -11,12 +9,6 @@ class Bot(Irc_Class.IRC):
     def __init__(self, server, bot_name, channel, port):
         Irc_Class.IRC.__init__(self, server, channel, port, bot_name)
         self.cmds = commands_init()
-
-
-
-
-
-
 
     def end(self):
         self.sock.send("QUIT : va faire une revision\r\n")
@@ -36,7 +28,7 @@ class Bot(Irc_Class.IRC):
                         print line
                     pseudo, user_account, ip, msg_type, content, target = message_parsing.new_parsing(line)
                     self.update_user_last_seen(pseudo)
-                    if not command_loop(pseudo, content, msg_type, self.sock, self.cmds,self.channel):
+                    if not command_loop(pseudo, content, msg_type, self.sock, self.cmds, target):
                         print_message("[" + msg_type + "] USER: " + pseudo + " send: " + content)
 
 
