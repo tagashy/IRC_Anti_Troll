@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 import time
 
 
@@ -6,5 +7,5 @@ class Log:
         self.log = open(log_file, "a")
 
     def write(self, message):
-        self.log.write("{}:{}\n".format(time.strftime("%d/%m/%y %M:%H:%S"), message))
+        self.log.write("{}:{}\n".format(time.strftime("%d/%m/%y %M:%H:%S"), message).encode("utf-8"))
         self.log.flush()

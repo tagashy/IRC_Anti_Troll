@@ -1,3 +1,6 @@
+from __future__ import unicode_literals
+
+import IRC_Apero
 import Irc_Class
 import commands
 import message_parsing
@@ -7,8 +10,13 @@ from config import config
 
 class Bot(Irc_Class.IRC):
     def __init__(self, server, bot_name, channel, port):
+        if channel == "#root-me":
+            self.error="BANNED CHANNEL"
+            exit(0)
         Irc_Class.IRC.__init__(self, server, channel, port, bot_name)
         self.cmds = commands_init()
+        self.apero = IRC_Apero.Apero(server, channel, port, bot_name, self.sock, self.users)
+
 
     def end(self):
         self.sock.send("QUIT : va faire une revision\r\n")
@@ -16,6 +24,7 @@ class Bot(Irc_Class.IRC):
         exit(0)
 
     def main_loop(self):
+        self.apero.start()
         while (1):
             if self.stopped():
                 self.end()
@@ -25,7 +34,7 @@ class Bot(Irc_Class.IRC):
                     self.sock.send(line.replace("PING", "PONG") + "\r\n")
                 elif line.strip() != "":
                     if config.debug:
-                        print line
+                        print (line)
                     pseudo, user_account, ip, msg_type, content, target = message_parsing.new_parsing(line)
                     self.update_user_last_seen(pseudo)
                     if not command_loop(pseudo, content, msg_type, self.sock, self.cmds, target):
@@ -64,5 +73,7 @@ def commands_init():
     cmds.append(cmd)
     cmd = Command(["!new_unit", "!new_unit?"], commands.start_bot, "NEW UNIT",
                   args=[("server", "require"), ("#channel", "require"), ("name", "require")])
+    cmds.append(cmd)
+    cmd = Command(["!apero", "!apero?"], commands.apero_status, "APERO")
     cmds.append(cmd)
     return cmds

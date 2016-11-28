@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 import Irc_Class
 import user_class
 from commands import *
