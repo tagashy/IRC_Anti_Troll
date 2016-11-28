@@ -1,3 +1,4 @@
+from __future__ import unicode_literals
 import random
 import shutil
 from ftplib import FTP

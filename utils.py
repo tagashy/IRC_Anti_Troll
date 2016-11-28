@@ -13,7 +13,7 @@ if config.log:
 
 
 def clean(string):
-    assert isinstance(string, str)
+    assert isinstance(string, basestring)
     return string.replace("..", "").replace("/", "").replace("\b", "").replace("\n", "").replace("\r", "")
 
 
@@ -31,7 +31,7 @@ def create_irc_socket(addr, bot_name, channel, port=6667):
     recv_sock.settimeout(2)
     try:
         while 1:
-            res = recv_sock.recv(1024)
+            res = recv_sock.recv(1024).decode('utf-8', errors='replace')
             if config.debug:
                 print_message(res)
             if "[Throttled]" in res:
@@ -77,7 +77,7 @@ def send_public_message(message, sock):
 
 
 def send_private_message(message, pseudo, sock):
-    sock.send("PRIVMSG {} :{}\r\n".format(pseudo, message))
+    sock.send("PRIVMSG {} :{}\r\n".format(pseudo, message).encode("utf-8"))
 
 
 def parse_name_list(msg, name_list_reg, channel="UNKNOWN", server="UNKNOWN"):
@@ -122,3 +122,22 @@ def convert_html_to_uni(text):
         htmlcode = htmlcodes[i]
         text = text.replace(htmlcode, funnychars[i])
     return text
+
+
+def parse_html_balise(balise, text):
+    assert isinstance(balise, basestring) and isinstance(text, basestring)
+
+    if balise.startswith(u"<"):
+        balise_name = balise.split()[0][1:]
+        balise_end = u"</{}>".format(balise_name)
+    else:
+        balise_name = balise
+        balise = u"<{}>".format(balise_name)
+        balise_end = u"</{}>".format(balise_name)
+    try:
+        partial = text.split(balise, 1)[1]
+        msg = partial.split(balise_end, 1)[0]
+        return msg
+    except IndexError:
+        print (u"[!] balise {} not found".format(balise))
+        return -1

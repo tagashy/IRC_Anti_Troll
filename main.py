@@ -1,4 +1,5 @@
 #!/usr/bin/python
+from __future__ import unicode_literals
 import threading
 
 import commands
@@ -33,7 +34,7 @@ class StdInput(threading.Thread):
             else:
                 try:
                     exec data
-                    print "[S] EXEC SUCCES"
+                    print_message ("[S] EXEC SUCCES")
                 except:
                     self.sock.send(data+"\n")
                     print "[S] SEND SUCCES"

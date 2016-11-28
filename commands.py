@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 import random
 import time
 
@@ -5,7 +7,7 @@ import TagaBot
 import rop
 import rpg
 from utils import *
-
+from requests import get
 num_genrator = random.Random()
 num_genrator.seed()
 color = 2
@@ -376,6 +378,16 @@ def last_time_seen(pseudo, message, msg_type, sock, channel):
                 else:
                     ret = "{} has never been seen".format(username)
                 print_message(ret, msg_type, sock, pseudo, channel)
+
+
+def apero_status(pseudo, message, msg_type, sock, channel):
+    r = get(u"http://estcequecestbientotlapero.fr/")
+    msg = parse_html_balise(u"h2", r.text)
+    apero = convert_html_to_uni(parse_html_balise(u"<font size=5>", msg))
+    print_message(apero, msg_type, sock,pseudo,channel)
+    if "font size=3" in msg:
+        conseil = convert_html_to_uni(parse_html_balise(u"<font size=3", msg))
+        print_message(conseil,msg_type, sock, pseudo, channel)
 
 
 from transfert_class import Transferrer

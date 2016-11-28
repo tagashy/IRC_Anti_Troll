@@ -1,3 +1,5 @@
+from __future__ import unicode_literals
+
 import threading
 
 import Bot_log
@@ -6,19 +8,19 @@ import utils
 
 
 class IRC(threading.Thread):
-    def __init__(self, addr, channel, port, bot_name):
+    def __init__(self, addr, channel, port, bot_name,sock=None,users=[]):
         threading.Thread.__init__(self)
         self._stop = threading.Event()
         self.server = addr
         self.channel = channel
         self.port = port
         self.name = bot_name
-        self.users = None
+        self.users = users
         logname = utils.clean("{}_{}.log".format(self.server, self.channel))
         self.log = Bot_log.Log(logname)
         self.started = False
         self.error = None
-        self.sock = None
+        self.sock = sock
 
     def stop(self):
         self._stop.set()
@@ -58,19 +60,20 @@ class IRC(threading.Thread):
                 break
 
     def run(self):
-        self.users, self.sock = utils.create_irc_socket(self.server, self.name, self.channel, self.port)
-        if self.sock == -1:
-            self.error = "Throttled"
-            exit(-1)
-        elif self.sock == -2:
-            self.error = "Registration timeout"
-            exit(-2)
-        elif self.sock == -3:
-            self.error = "Link closed"
-            exit(-3)
-        utils.print_message("[!] Initialisation of Bot done")
+        if self.sock is None:
+            self.users, self.sock = utils.create_irc_socket(self.server, self.name, self.channel, self.port)
+            if self.sock == -1:
+                self.error = "Throttled"
+                exit(-1)
+            elif self.sock == -2:
+                self.error = "Registration timeout"
+                exit(-2)
+            elif self.sock == -3:
+                self.error = "Link closed"
+                exit(-3)
+            utils.print_message("[!] Initialisation of Bot done")
         self.started = True
-        print "[!] Starting {} on server {}:{} in channel {}".format(self.name, self.server, self.port, self.channel)
+        print ("[!] Starting {} on server {}:{} in channel {}".format(self.name, self.server, self.port, self.channel))
         self.main_loop()
 
     def main_loop(self):
