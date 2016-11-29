@@ -22,7 +22,7 @@ rpg_list = []
 bot_list = []
 
 
-def send_ticket_to_ghozt(pseudo, message, msg_type, sock):
+def send_ticket_to_ghozt(pseudo, message, msg_type, sock, channel):
     if msg_type == "PUBMSG":
         send_public_message("\x01ACTION pointe ghozt\x01", sock)
         send_public_message("il poura t'aider " + pseudo + " pour (" + message + ")", sock)

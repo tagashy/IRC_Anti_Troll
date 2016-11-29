@@ -33,7 +33,7 @@ class Apero(Irc_Class.IRC):
         if apero == self.apero:
             apero = ""
         if "font size=3" in msg:
-            conseil = convert_html_to_uni(parse_html_balise(u"<font size=3", msg))
+            conseil = convert_html_to_uni(parse_html_balise(u"<font size=3>", msg))
             if conseil == self.conseil:
                 conseil = ""
         return apero, conseil

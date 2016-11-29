@@ -50,7 +50,7 @@ def create_irc_socket(addr, bot_name, channel, port=6667):
         print_message("[!] join {} \r\n".format(channel))
 
     while " 366 " not in res:
-        res = recv_sock.recv(1024)
+        res = recv_sock.recv(1024).decode('utf-8', errors='replace')
         if config.debug:
             print_message(res)
         if " 353 " in res:
@@ -69,7 +69,8 @@ def print_message(message, msg_type="STDIN", sock=None, pseudo=None, channel=Non
     elif msg_type == "STDIN":
         print (message)
     if config.log:
-        log.write(message)
+        if message != "":
+            log.write(message)
 
 
 def send_public_message(message, sock):

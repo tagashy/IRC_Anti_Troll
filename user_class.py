@@ -10,6 +10,7 @@ class User:
         self.actif = False
         self.lastSeen = time.strftime("%d/%m/%y %H:%M:%S")
         self.digiTime = time.time()
+        self.alcolemie=0
 
     def update_last_seen(self):
         self.lastSeen = time.strftime("%d/%m/%y %H:%M:%S")

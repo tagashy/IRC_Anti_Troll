@@ -11,12 +11,11 @@ from config import config
 class Bot(Irc_Class.IRC):
     def __init__(self, server, bot_name, channel, port):
         if channel == "#root-me":
-            self.error="BANNED CHANNEL"
+            self.error = "BANNED CHANNEL"
             exit(0)
         Irc_Class.IRC.__init__(self, server, channel, port, bot_name)
-        self.cmds = commands_init()
-        self.apero=None
-
+        self.cmds = commands_init(self)
+        self.apero = None
 
     def end(self):
         self.sock.send("QUIT : va faire une revision\r\n")
@@ -24,12 +23,10 @@ class Bot(Irc_Class.IRC):
         exit(0)
 
     def main_loop(self):
-        self.apero = IRC_Apero.Apero(self.server, self.channel, self.port, self.name, self.sock, self.users)
-        self.apero.start()
         while (1):
             if self.stopped():
                 self.end()
-            res = self.sock.recv(1024)
+            res = self.sock.recv(1024).decode('utf-8', errors='replace')
             for line in res.split("\r\n"):
                 if "PING" in line:
                     self.sock.send(line.replace("PING", "PONG") + "\r\n")
@@ -41,8 +38,23 @@ class Bot(Irc_Class.IRC):
                     if not command_loop(pseudo, content, msg_type, self.sock, self.cmds, target):
                         print_message("[" + msg_type + "] USER: " + pseudo + " send: " + content)
 
+    def stop_apero(self, pseudo, message, msg_type, sock, channel):
+        self.apero.stop()
+        print_message("Fin de l'apero", msg_type, sock, pseudo, channel)
 
-def commands_init():
+    def start_apero(self, pseudo, message, msg_type, sock, channel):
+        if self.apero is not None:
+            if self.apero.stopped():
+                self.apero = IRC_Apero.Apero(self.server, self.channel, self.port, self.name, self.sock, self.users)
+                self.apero.start()
+                print_message("debut de l'apero", msg_type, sock, pseudo, channel)
+            else:
+                print_message("l'apero a deja commencer espece d'alcoolique", msg_type, sock, pseudo, channel)
+        else:
+            self.apero = IRC_Apero.Apero(self.server, self.channel, self.port, self.name, self.sock, self.users)
+            self.apero.start()
+            print_message("debut de l'apero", msg_type, sock, pseudo, channel)
+def commands_init(bot):
     cmds = []
     cmd = Command(["!reload", "!reload?"], commands.reload_bot, "RELOAD", args=[("module/all", "require")])
     cmds.append(cmd)
@@ -76,5 +88,9 @@ def commands_init():
                   args=[("server", "require"), ("#channel", "require"), ("name", "require")])
     cmds.append(cmd)
     cmd = Command(["!apero", "!apero?"], commands.apero_status, "APERO")
+    cmds.append(cmd)
+    cmd = Command(["!end_apero", "!fin_apero", "!stop_apero", ], bot.stop_apero, "FIN APERO")
+    cmds.append(cmd)
+    cmd = Command(["!debut_apero", "!start_apero"], bot.start_apero, "DEBUT APERO")
     cmds.append(cmd)
     return cmds

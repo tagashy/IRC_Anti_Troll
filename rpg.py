@@ -44,7 +44,7 @@ class Rpg(threading.Thread):
                 self.sock.close()
                 exit(0)
             try:
-                res = self.sock.recv(1024)
+                res = self.sock.recv(1024).decode('utf-8', errors='replace')
                 if "PING" in res.split(" ")[0]:
                     self.sock.send(res.replace("PING", "PONG"))
                 elif res.strip() != "":
@@ -79,7 +79,7 @@ class Rpg(threading.Thread):
                 self.sock.close()
                 exit(0)
             try:
-                res = self.sock.recv(1024)
+                res = self.sock.recv(1024).decode('utf-8', errors='replace')
                 if "PING" in res.split(" ")[0]:
                     self.sock.send(res.replace("PING", "PONG"))
                 elif res.strip() != "":

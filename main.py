@@ -28,7 +28,7 @@ class StdInput(threading.Thread):
         while 1:
             if self.stopped():
                 self.end()
-            data = input()
+            data = raw_input()
             if command_loop("STDIN", data, "STDIN", self.sock, cmds, "STDIN"):
                 print_message("[S] COMMAND SUCESS")
             else:
