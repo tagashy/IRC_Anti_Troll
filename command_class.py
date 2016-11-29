@@ -23,7 +23,7 @@ def command_loop(pseudo, message, msg_type, sock, cmds, channel):
         print_message("[!] help called by " + pseudo)
         return 1
     for cmd in cmds:
-        if isinstance(cmd.keyword, str):
+        if isinstance(cmd.keyword, str) or isinstance(cmd.keyword, unicode):
             if message == cmd.keyword or message + "?" == cmd.keyword:
                 if "?" in message:
                     help_cmd(cmd, msg_type, pseudo, sock, channel)
@@ -50,7 +50,7 @@ def command_loop(pseudo, message, msg_type, sock, cmds, channel):
 
 
 def help_cmd(cmd, msg_type, pseudo, sock, channel):
-    if isinstance(cmd.keyword, str):
+    if isinstance(cmd.keyword, str) or isinstance(cmd.keyword, unicode):
         ret = cmd.keyword
     else:
         ret = cmd.keyword[0]
@@ -65,7 +65,7 @@ def help_cmds(cmds, msg_type, pseudo, sock, channel):
     ret = "Command available:"
     for cmd in cmds:
         if cmd.help:
-            if isinstance(cmd.keyword, str):
+            if isinstance(cmd.keyword, str) or isinstance(cmd.keyword, unicode):
                 ret += " " + cmd.keyword
             else:
                 for key in cmd.keyword:

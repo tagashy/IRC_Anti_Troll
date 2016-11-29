@@ -13,7 +13,6 @@ class Apero(Irc_Class.IRC):
         Irc_Class.IRC.__init__(self, addr, channel, port, bot_name, sock, users)
         self.apero = ""
         self.conseil = ""
-        print channel, addr, port, bot_name, sock, users
 
     def main_loop(self):
         while not self.stopped():

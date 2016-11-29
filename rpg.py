@@ -188,7 +188,7 @@ class Rpg(threading.Thread):
         ret = "Command available:"
         for cmd in self.cmds:
             if cmd.helpable:
-                if isinstance(cmd.keyword, str):
+                if isinstance(cmd.keyword, str) or isinstance(cmd.keyword, unicode):
                     ret += " " + cmd.keyword
                 else:
                     for key in cmd.keyword:

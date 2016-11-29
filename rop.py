@@ -61,7 +61,7 @@ class RopThread(threading.Thread):
 
 
 def rop(params="--ropchain", path="/root/root-me/app-sys/ch32"):
-    if isinstance(params, str):
+    if isinstance(params, str) or isinstance(params, unicode):
         params = [params]
     elif not isinstance(params, list):
         return -1

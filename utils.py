@@ -13,7 +13,7 @@ if config.log:
 
 
 def clean(string):
-    assert isinstance(string, basestring)
+    assert isinstance(string, str) or isinstance(string, unicode)
     return string.replace("..", "").replace("/", "").replace("\b", "").replace("\n", "").replace("\r", "")
 
 
@@ -67,7 +67,7 @@ def print_message(message, msg_type="STDIN", sock=None, pseudo=None, channel=Non
     elif msg_type == "PUBMSG":
         send_private_message(message, channel, sock)
     elif msg_type == "STDIN":
-        print message
+        print (message)
     if config.log:
         log.write(message)
 
@@ -125,7 +125,7 @@ def convert_html_to_uni(text):
 
 
 def parse_html_balise(balise, text):
-    assert isinstance(balise, basestring) and isinstance(text, basestring)
+    assert (isinstance(balise, str) or isinstance(balise, unicode)) and (isinstance(text, str) or isinstance(balise, unicode))
 
     if balise.startswith(u"<"):
         balise_name = balise.split()[0][1:]

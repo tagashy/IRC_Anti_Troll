@@ -28,7 +28,7 @@ class StdInput(threading.Thread):
         while 1:
             if self.stopped():
                 self.end()
-            data = raw_input()
+            data = input()
             if command_loop("STDIN", data, "STDIN", self.sock, cmds, "STDIN"):
                 print_message("[S] COMMAND SUCESS")
             else:
@@ -37,7 +37,7 @@ class StdInput(threading.Thread):
                     print_message ("[S] EXEC SUCCES")
                 except:
                     self.sock.send(data+"\n")
-                    print "[S] SEND SUCCES"
+                    print ("[S] SEND SUCCES")
 
     def stop(self):
         self._stop.set()

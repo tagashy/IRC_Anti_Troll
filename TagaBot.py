@@ -15,7 +15,7 @@ class Bot(Irc_Class.IRC):
             exit(0)
         Irc_Class.IRC.__init__(self, server, channel, port, bot_name)
         self.cmds = commands_init()
-        self.apero = IRC_Apero.Apero(server, channel, port, bot_name, self.sock, self.users)
+        self.apero=None
 
 
     def end(self):
@@ -24,6 +24,7 @@ class Bot(Irc_Class.IRC):
         exit(0)
 
     def main_loop(self):
+        self.apero = IRC_Apero.Apero(self.server, self.channel, self.port, self.name, self.sock, self.users)
         self.apero.start()
         while (1):
             if self.stopped():

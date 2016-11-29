@@ -1,5 +1,11 @@
 from __future__ import unicode_literals
-
+try:
+    reload  # Python 2.7
+except NameError:
+    try:
+        from importlib import reload  # Python 3.4+
+    except ImportError:
+        from imp import reload  # Python 3.0 - 3.3
 import random
 import time
 
@@ -337,7 +343,7 @@ def last_time_seen(pseudo, message, msg_type, sock, channel):
     server = "NONE"
     user_actif = False
     if len(param) > 1:
-        for i in xrange(1, len(param)):
+        for i in range(1, len(param)):
             username = param[i]
             if username != "":
                 found = False
@@ -364,7 +370,7 @@ def last_time_seen(pseudo, message, msg_type, sock, channel):
                             channel_user = bot.channel
                             server = bot.server
                 if found:
-                    print last_seen
+                    print (last_seen)
                     if not user_actif:
                         ret = "{} has been seen the last time on server {} in channel {} at: {}".format(username,
                                                                                                         server,
