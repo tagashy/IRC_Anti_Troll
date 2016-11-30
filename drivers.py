@@ -9,7 +9,6 @@ from scp import SCPClient
 
 from command_class import Command
 
-
 def init_protocol_handler():
     handlers = []
     handler = Command("http", get_http_file, "HTTP")
