@@ -9,8 +9,8 @@ from utils import convert_html_to_uni, parse_html_balise, print_message
 
 
 class Apero(Irc_Class.IRC):
-    def __init__(self, addr, channel, port, bot_name, sock, users):
-        Irc_Class.IRC.__init__(self, addr, channel, port, bot_name, sock, users)
+    def __init__(self, addr, channel, port, bot_name, sock):
+        Irc_Class.IRC.__init__(self, addr, channel, port, bot_name, sock)
         self.apero = ""
         self.conseil = ""
 

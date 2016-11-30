@@ -1,4 +1,5 @@
 from __future__ import unicode_literals
+
 try:
     reload  # Python 2.7
 except NameError:
@@ -14,12 +15,16 @@ import rop
 import rpg
 from utils import *
 from requests import get
+from Users_List import USERLIST
+from Irc_Class import IRC
+
 num_genrator = random.Random()
 num_genrator.seed()
 color = 2
 transferrer_list = []
 rpg_list = []
 bot_list = []
+eyes = []
 
 
 def send_ticket_to_ghozt(pseudo, message, msg_type, sock, channel):
@@ -32,8 +37,11 @@ def die(pseudo, message, msg_type, sock, channel):
     if pseudo == config.admin or msg_type == "STDIN":
         print_message("[!] Master say I'm DEAD")
         print_message("Ok master", msg_type, sock, pseudo, channel)
-        sock.send("QUIT :suis les ordres\r\n")
-        sock.close()
+        try:
+            sock.send("QUIT :suis les ordres\r\n")
+            sock.close()
+        except:
+            pass
         end_other_thread()
         exit(0)
     else:
@@ -47,6 +55,9 @@ def end_other_thread():
     for rpg in rpg_list:
         rpg.stop()
         print_message("[!] RPG {} stopped".format(rpg.name))
+    for spy in eyes:
+        spy.stop()
+        print_message("[!] SPY {} stopped".format(spy.name))
 
 
 def transfert_message_from_other_place(pseudo, message, msg_type, sock, channel):
@@ -69,11 +80,11 @@ def transfert_message_from_other_place(pseudo, message, msg_type, sock, channel)
                           sock, pseudo, channel)
             return
         elif len(param) == 3 or (len(param) == 4 and param[3].lower() != "publique" and param[3].lower() != "public"):
-            if check_not_already_use_transferer(server_addr, param[2], port, pseudo):
+            if check_not_already_use(server_addr, param[2], port, pseudo):
                 print_message("Transferer already exist", msg_type, sock, pseudo, channel)
                 return
         else:
-            if check_not_already_use_transferer(server_addr, param[2], port, None):
+            if check_not_already_use(server_addr, param[2], port, None):
                 print_message("Transferer already exist", msg_type, sock, pseudo, channel)
                 return
         external_bot_name = "user_" + str(num_genrator.randint(1000, 1000 * 1000))
@@ -102,8 +113,8 @@ def transfert_message_from_other_place(pseudo, message, msg_type, sock, channel)
         print_message("Transfert start", msg_type, sock, pseudo, channel)
 
 
-def check_not_already_use_transferer(server_addr, channel, external_port, target=None):
-    for tr in transferrer_list:
+def check_not_already_use(server_addr, channel, external_port, target=None, list_to_check=transferrer_list):
+    for tr in list_to_check:
         if config.debug:
             print_message(
                 "[D] {} {} {} {} {} {} {} {}".format(server_addr, channel, external_port, tr.server, tr.channel,
@@ -192,15 +203,48 @@ def suppress_transferrer(pseudo, message, msg_type, sock, channel):
             print_message("too much :", msg_type, sock, pseudo, channel)
             return
         tr_stopped = False
-        for tr in transferrer_list:
-            if tr.port == port and tr.server == server_addr and tr.channel == param[2]:
-                tr.stop()
-                tr_stopped = True
-                print_message("[!] transferrer " + tr.channel + " stopped")
-                transferrer_list.remove(tr)
-                print_message("transferrer " + tr.channel + " stopped", msg_type, sock, pseudo, channel)
-        if not tr_stopped:
-            print_message("no transferrer like this one", msg_type, sock, pseudo, channel)
+        if len(param) >= 4:
+            if param[3][:1] == "#" or param[3].lower() == "public" or param[3].lower() == "publique":
+                for tr in transferrer_list:
+                    if tr.port == port and tr.server == server_addr and tr.channel == param[2] and tr.pseudo is None:
+                        tr.stop()
+                        tr_stopped = True
+                        print_message("[!] transferer " + tr.channel + " stopped")
+                        transferrer_list.remove(tr)
+                        print_message("transferer " + tr.channel + " stopped", msg_type, sock, pseudo, channel)
+                    if not tr_stopped:
+                        print_message("no transferer like this one", msg_type, sock, pseudo, channel)
+            elif param[3].lower() == "private" or param[3].lower() == "priver":
+                for tr in transferrer_list:
+                    if tr.port == port and tr.server == server_addr and tr.channel == param[2] and tr.pseudo == pseudo:
+                        tr.stop()
+                        tr_stopped = True
+                        print_message("[!] transferer " + tr.channel + " stopped")
+                        transferrer_list.remove(tr)
+                        print_message("transferer " + tr.channel + " stopped", msg_type, sock, pseudo, channel)
+                    if not tr_stopped:
+                        print_message("no transferer like this one", msg_type, sock, pseudo, channel)
+            else:
+                for tr in transferrer_list:
+                    if tr.port == port and tr.server == server_addr and tr.channel == param[2] and tr.pseudo == param[
+                        3]:
+                        tr.stop()
+                        tr_stopped = True
+                        print_message("[!] transferer " + tr.channel + " stopped")
+                        transferrer_list.remove(tr)
+                        print_message("transferer " + tr.channel + " stopped", msg_type, sock, pseudo, channel)
+                    if not tr_stopped:
+                        print_message("no transferer like this one", msg_type, sock, pseudo, channel)
+        else:
+            for tr in transferrer_list:
+                if tr.port == port and tr.server == server_addr and tr.channel == param[2]:
+                    tr.stop()
+                    tr_stopped = True
+                    print_message("[!] transferer " + tr.channel + " stopped")
+                    transferrer_list.remove(tr)
+                    print_message("transferer " + tr.channel + " stopped", msg_type, sock, pseudo, channel)
+            if not tr_stopped:
+                print_message("no transferer like this one", msg_type, sock, pseudo, channel)
 
 
 def start_rpg(pseudo, message, msg_type, sock, channel):
@@ -270,6 +314,7 @@ def stop_rpg(pseudo, message, msg_type, sock, channel):
                 rpg_game.stop()
                 tr_stopped = True
                 print_message("[!] RPG " + rpg_game.channel + " stopped")
+                print_message("transferer " + rpg_game.channel + " stopped", msg_type, sock, pseudo, channel)
         if not tr_stopped:
             print_message("no RPG like this one", msg_type, sock, pseudo, channel)
 
@@ -334,53 +379,65 @@ def start_bot(pseudo, message, msg_type, sock, channel):
                 return -2
         bot_list.append(bot)
         print_message("Bot started", msg_type, sock, pseudo, channel)
-        return 1
+        return bot
+
+
+def list_bot(pseudo, message, msg_type, sock, channel):
+    print_message("List of BOT:", msg_type, sock, pseudo, channel)
+    for bot in bot_list:
+        print_message("{} on {} in channel {}".format(bot.name, bot.server, bot.channel), msg_type, sock, pseudo,
+                      channel)
+
+
+def stop_bot(pseudo, message, msg_type, sock, channel):
+    usage = "!kill_bot <server|require> <channel|require>"
+    param = message.split()
+    if len(param) == 3:
+        addr = param[1]
+        server_addr = addr.split(":")
+        if len(server_addr) == 1:
+            server_addr = addr
+            port = 6667
+        elif len(server_addr) == 2:
+            port = int(server_addr[1])
+            server_addr = server_addr[0]
+        else:
+            print_message("too much :", msg_type, sock, pseudo, channel)
+            return
+        tr_stopped = False
+        for bot in bot_list:
+            if bot.port == port and bot.server == server_addr and bot.channel == param[2]:
+                if bot.sock != sock:
+                    bot.stop()
+                    tr_stopped = True
+                    bot_list.remove(bot)
+                    print_message("[!] Bot " + bot.channel + " stopped")
+                    print_message("Bot " + bot.channel + " stopped", msg_type, sock, pseudo, channel)
+                else:
+                    print_message("Eum NO YOU CAN'T KILL ME", msg_type, sock, pseudo, channel)
+                    return
+        if not tr_stopped:
+            print_message("no bot like this one", msg_type, sock, pseudo, channel)
 
 
 def last_time_seen(pseudo, message, msg_type, sock, channel):
     param = message.split()
-    channel_user = "NONE"
-    server = "NONE"
-    user_actif = False
     if len(param) > 1:
         for i in range(1, len(param)):
             username = param[i]
             if username != "":
-                found = False
-                last_seen = ""
-                digi_time = 0
-                for tr in transferrer_list:
-                    last, num_time, actif = tr.last_seen(username)
-                    if last != -1:
-                        found = True
-                        if digi_time < num_time:
-                            user_actif = actif
-                            last_seen = last
-                            digi_time = num_time
-                            channel_user = tr.channel
-                            server = tr.server
-                for bot in bot_list:
-                    last, num_time, actif = bot.last_seen(username)
-                    if last != -1:
-                        found = True
-                        if digi_time < num_time:
-                            user_actif = actif
-                            last_seen = last
-                            digi_time = num_time
-                            channel_user = bot.channel
-                            server = bot.server
-                if found:
-                    print (last_seen)
-                    if not user_actif:
+                u = USERLIST.get_user(username)
+                if u != -1:
+                    if not u.actif:
                         ret = "{} has been seen the last time on server {} in channel {} at: {}".format(username,
-                                                                                                        server,
-                                                                                                        channel_user,
-                                                                                                        last_seen)
+                                                                                                        u.server,
+                                                                                                        u.channel,
+                                                                                                        u.lastSeen)
                     else:
                         ret = "{} has been actif the last time on server {} in channel {} at: {}".format(username,
-                                                                                                         server,
-                                                                                                         channel_user,
-                                                                                                         last_seen)
+                                                                                                         u.server,
+                                                                                                         u.channel,
+                                                                                                         u.lastSeen)
                 else:
                     ret = "{} has never been seen".format(username)
                 print_message(ret, msg_type, sock, pseudo, channel)
@@ -390,10 +447,94 @@ def apero_status(pseudo, message, msg_type, sock, channel):
     r = get(u"http://estcequecestbientotlapero.fr/")
     msg = parse_html_balise(u"h2", r.text)
     apero = convert_html_to_uni(parse_html_balise(u"<font size=5>", msg))
-    print_message(apero, msg_type, sock,pseudo,channel)
+    print_message(apero, msg_type, sock, pseudo, channel)
     if "font size=3" in msg:
         conseil = convert_html_to_uni(parse_html_balise(u"<font size=3", msg))
-        print_message(conseil,msg_type, sock, pseudo, channel)
+        print_message(conseil, msg_type, sock, pseudo, channel)
+
+
+def user_list(pseudo, message, msg_type, sock, channel):
+    for line in unicode(USERLIST).split("\r\n"):
+        print_message(line, msg_type, sock, pseudo, channel)
+        time.sleep(0.5)
+    return 1
+
+
+def spy_channel(pseudo, message, msg_type, sock, channel):
+    param = message.split()
+    if len(param) >= 3:
+        addr = param[1]
+        server_addr = addr.split(":")
+        if len(server_addr) == 1:
+            server_addr = addr
+            port = 6667
+        elif len(server_addr) == 2:
+            port = int(server_addr[1])
+            server_addr = server_addr[0]
+        else:
+            print_message("too much :", msg_type, sock, pseudo, channel)
+            return
+        if check_valid_server(server_addr, param[2], port):
+            print_message("sorry you can't choose this channel, I am already doing the job of spy",
+                          msg_type,
+                          sock, pseudo, channel)
+            return
+        else:
+            if check_not_already_use(server_addr, param[2], port, None, list_to_check=eyes):
+                print_message("Spy already exist", msg_type, sock, pseudo, channel)
+                return
+        external_bot_name = "user_" + str(num_genrator.randint(1000, 1000 * 1000))
+        print_message("[!] name of Spy user:" + external_bot_name)
+        spy = IRC(server_addr, param[2], port, external_bot_name)
+        spy.start()
+        timeout_start = time.time() + 10
+        while not spy.started:
+            if time.time() > timeout_start:
+                spy.stop()
+                print_message("Spy cannot be start in 10 seconds aborting!", msg_type, sock, pseudo, channel)
+                return
+            elif spy.error is not None:
+                spy.stop()
+                print_message("Spy cannot be start because of error: " + spy.error, msg_type,
+                              sock, pseudo, channel)
+                return
+        print_message("[!] spying data from " + addr + param[2] + " started")
+        eyes.append(spy)
+        print_message("Spy start", msg_type, sock, pseudo, channel)
+
+
+def list_spy(pseudo, message, msg_type, sock, channel):
+    print_message("List of SPY:", msg_type, sock, pseudo, channel)
+    for spy in eyes:
+        print_message("{} on {} in channel {}".format(spy.name, spy.server, spy.channel), msg_type, sock, pseudo,
+                      channel)
+
+
+def stop_spy(pseudo, message, msg_type, sock, channel):
+    usage = "!kill_spy <server|require> <channel|require>"
+    param = message.split()
+    if len(param) == 3:
+        addr = param[1]
+        server_addr = addr.split(":")
+        if len(server_addr) == 1:
+            server_addr = addr
+            port = 6667
+        elif len(server_addr) == 2:
+            port = int(server_addr[1])
+            server_addr = server_addr[0]
+        else:
+            print_message("too much :", msg_type, sock, pseudo, channel)
+            return
+        tr_stopped = False
+        for spy in eyes:
+            if spy.port == port and spy.server == server_addr and spy.channel == param[2]:
+                spy.stop()
+                tr_stopped = True
+                eyes.remove(spy)
+                print_message("[!] Spy " + spy.channel + " stopped")
+                print_message("Spy " + spy.channel + " stopped", msg_type, sock, pseudo, channel)
+        if not tr_stopped:
+            print_message("no spy like this one", msg_type, sock, pseudo, channel)
 
 
 from transfert_class import Transferrer

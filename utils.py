@@ -2,9 +2,10 @@ from __future__ import unicode_literals
 
 import re
 from socket import *
-
+from Users_List import USERLIST
 from config import config
 from user_class import User
+
 
 if config.log:
     import Bot_log
@@ -47,7 +48,7 @@ def create_irc_socket(addr, bot_name, channel, port=6667):
     except timeout:
         recv_sock.send("JOIN {} \r\n".format(channel))
         recv_sock.settimeout(None)
-        print_message("[!] join {} \r\n".format(channel))
+        print_message("[!] join {}".format(channel))
 
     while " 366 " not in res:
         res = recv_sock.recv(1024).decode('utf-8', errors='replace')
@@ -55,7 +56,9 @@ def create_irc_socket(addr, bot_name, channel, port=6667):
             print_message(res)
         if " 353 " in res:
             print_message("[!] creation of user list")
-            users += parse_name_list(res, name_list_reg, channel, addr)
+            users += parse_name_list(res, name_list_reg, channel, "{}:{}".format(addr,port))
+            for user in users:
+                USERLIST.add_user(user, "{}:{}".format(addr, port), channel)
             if config.debug:
                 print_message("[D] users of channel {}:{}".format(channel, users))
     return users, recv_sock
@@ -90,7 +93,7 @@ def parse_name_list(msg, name_list_reg, channel="UNKNOWN", server="UNKNOWN"):
         for name in names:
             users.append(User(name, channel, server))
         return users
-
+    return []
 
 def cut_at_cara(string, c):
     index = string.find(c)

@@ -1,7 +1,8 @@
 #!/usr/bin/python
 from __future__ import unicode_literals
-import threading
 
+import threading
+import readline
 import commands
 from command_class import *
 from config import config
@@ -24,6 +25,8 @@ class StdInput(threading.Thread):
         cmds.append(cmd)
         cmd = Command("!die", commands.die, "die")
         cmds.append(cmd)
+        cmd = Command("!list", commands.user_list, "list")
+        cmds.append(cmd)
         del cmd
         while 1:
             if self.stopped():
@@ -34,10 +37,13 @@ class StdInput(threading.Thread):
             else:
                 try:
                     exec data
-                    print_message ("[S] EXEC SUCCES")
+                    print_message("[S] EXEC SUCCES")
                 except:
-                    self.sock.send(data+"\n")
-                    print ("[S] SEND SUCCES")
+                    try:
+                        self.sock.send(data + "\n")
+                        print ("[S] SEND SUCCES")
+                    except:
+                        print ("[F] COMMAND/EXEC/SEND FAIL")
 
     def stop(self):
         self._stop.set()
@@ -46,15 +52,20 @@ class StdInput(threading.Thread):
         return self._stop.isSet()
 
 
-if commands.start_bot("STDIN", "!start_bot {}:{} {} {}".format(config.main_server, config.main_port, config.main_channel,
-                                                            config.bot_name), "STDIN", None,"STDIN")>0:
-# TagaBot = bot(config.main_server, config.bot_name, config.main_channel, config.main_port)
-# TagaBot.daemon = True
-# TagaBot.start()
-    input_obj = StdInput(commands.bot_list[0].sock)
-    input_obj.daemon = True
-    input_obj.start()
-# TagaBot.join()
-# input_obj.stop()
-# commands.end_other_thread()
-# TagaBot.stop()
+if __name__ == '__main__':
+    readline.parse_and_bind("tab: complete")
+    readline.set_completer()
+    TAGABOT = commands.start_bot("STDIN", "!start_bot {}:{} {} {}".format(config.main_server, config.main_port,
+                                                                          config.main_channel,
+                                                                          config.bot_name), "STDIN", None, "STDIN")
+    if TAGABOT > 0:
+        # TagaBot = bot(config.main_server, config.bot_name, config.main_channel, config.main_port)
+        # TagaBot.daemon = True
+        # TagaBot.start()
+        input_obj = StdInput(commands.bot_list[0].sock)
+        input_obj.daemon = True
+        input_obj.start()
+        # TagaBot.join()
+        # input_obj.stop()
+        # commands.end_other_thread()
+        # TagaBot.stop()

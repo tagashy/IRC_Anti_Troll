@@ -1,21 +1,24 @@
 from __future__ import unicode_literals
 
 import threading
+from socket import timeout
 
 import Bot_log
-import user_class
+import message_parsing
 import utils
+from Users_List import USERLIST
+from config import config
 
 
 class IRC(threading.Thread):
-    def __init__(self, addr, channel, port, bot_name,sock=None,users=[]):
+    def __init__(self, addr, channel, port, bot_name, sock=None):
         threading.Thread.__init__(self)
         self._stop = threading.Event()
         self.server = addr
         self.channel = channel
         self.port = port
         self.name = bot_name
-        self.users = users
+        self.pseudo = None
         logname = utils.clean("{}_{}.log".format(self.server, self.channel))
         self.log = Bot_log.Log(logname)
         self.started = False
@@ -35,29 +38,20 @@ class IRC(threading.Thread):
         return -1, -1, -1
 
     def update_user_last_seen(self, pseudo):
-        found = False
-        for user in self.users:
-            if pseudo == user.username:
-                user.update_last_seen()
-                user.actif = True
-                found = True
-                break
-        if not found:
-            self.users.append(user_class.User(pseudo))
+        if USERLIST.update_user(pseudo, "{}:{}".format(self.server, self.port), self.channel) < 1:
+            USERLIST.add_user(pseudo, "{}:{}".format(self.server, self.port), self.channel)
 
     def add_user(self, pseudo):
-        for user in self.users:
-            if user.username == pseudo:
-                user.actif = True
-                return
-        self.users.append(user_class.User(pseudo, self.channel, self.server))
+        USERLIST.add_user(pseudo, "{}:{}".format(self.server, self.port), self.channel)
         return
 
     def deactivate_user(self, pseudo):
-        for user in self.users:
-            if pseudo == user.username:
-                user.actif = False
-                break
+        USERLIST.deactivate_user(pseudo)
+
+    def end(self):
+        self.sock.send("QUIT : \r\n")
+        self.sock.close()
+        exit(0)
 
     def run(self):
         if self.sock is None:
@@ -77,4 +71,63 @@ class IRC(threading.Thread):
         self.main_loop()
 
     def main_loop(self):
+        self.sock.settimeout(2)
+        while (1):
+            if self.stopped():
+                self.end()
+            try:
+                res = self.sock.recv(1024).decode('utf-8', errors='replace')
+                for line in res.split("\r\n"):
+                    if "PING" in line:
+                        self.sock.send(line.replace("PING", "PONG") + "\r\n")
+                    elif line.strip() != "":
+                        if config.debug:
+                            print (line)
+                            self.log.write(res)
+                        pseudo, user_account, ip, msg_type, content, target = message_parsing.new_parsing(line)
+                        self.update_user_last_seen(pseudo)
+                        if msg_type == "PART":
+                            self.deactivate_user(pseudo)
+                            self.user_part(pseudo, user_account, ip, msg_type, content, target)
+                        elif msg_type == "QUIT":
+                            self.deactivate_user(pseudo)
+                            self.user_quit(pseudo, user_account, ip, msg_type, content, target)
+                        elif msg_type == "JOIN":
+                            self.add_user(pseudo)
+                            self.user_join(pseudo, user_account, ip, msg_type, content, target)
+                        elif msg_type == "PRIVMSG":
+                            self.update_user_last_seen(pseudo)
+                            self.user_privmsg(pseudo, user_account, ip, msg_type, content, target)
+                        elif msg_type == "PUBMSG":
+                            self.update_user_last_seen(pseudo)
+                            self.user_pubmsg(pseudo, user_account, ip, msg_type, content, target)
+                        elif msg_type == "KICK":
+                            self.deactivate_user(pseudo)
+                            self.user_kick(pseudo, user_account, ip, msg_type, content, target)
+                        elif msg_type == "BAN":
+                            self.deactivate_user(pseudo)
+                            self.user_ban(pseudo, user_account, ip, msg_type, content, target)
+
+            except timeout:
+                pass
+
+    def user_join(self, pseudo, user_account, ip, msg_type, content, target):
+        pass
+
+    def user_privmsg(self, pseudo, user_account, ip, msg_type, content, target):
+        pass
+
+    def user_pubmsg(self, pseudo, user_account, ip, msg_type, content, target):
+        pass
+
+    def user_quit(self, pseudo, user_account, ip, msg_type, content, target):
+        pass
+
+    def user_part(self, pseudo, user_account, ip, msg_type, content, target):
+        pass
+
+    def user_ban(self, pseudo, user_account, ip, msg_type, content, target):
+        pass
+
+    def user_kick(self, pseudo, user_account, ip, msg_type, content, target):
         pass
