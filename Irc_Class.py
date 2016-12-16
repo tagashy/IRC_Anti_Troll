@@ -1,19 +1,18 @@
 from __future__ import unicode_literals
 
-import threading
 from socket import timeout
 
 import Bot_log
 import message_parsing
+import mythread
 import utils
 from Users_List import USERLIST
 from config import config
 
 
-class IRC(threading.Thread):
+class IRC(mythread.Thread):
     def __init__(self, addr, channel, port, bot_name, sock=None):
-        threading.Thread.__init__(self)
-        self._stop = threading.Event()
+        mythread.Thread.__init__(self)
         self.server = addr
         self.channel = channel
         self.port = port
@@ -21,15 +20,7 @@ class IRC(threading.Thread):
         self.pseudo = None
         logname = utils.clean("{}_{}.log".format(self.server, self.channel))
         self.log = Bot_log.Log(logname)
-        self.started = False
-        self.error = None
         self.sock = sock
-
-    def stop(self):
-        self._stop.set()
-
-    def stopped(self):
-        return self._stop.isSet()
 
     def last_seen(self, username):
         for user in self.users:
@@ -53,7 +44,7 @@ class IRC(threading.Thread):
         self.sock.close()
         exit(0)
 
-    def run(self):
+    def init(self):
         if self.sock is None:
             self.users, self.sock = utils.create_irc_socket(self.server, self.name, self.channel, self.port)
             if self.sock == -1:
@@ -67,10 +58,13 @@ class IRC(threading.Thread):
                 exit(-3)
             utils.print_message("[!] Initialisation of Bot done")
         self.started = True
+        self.IRC_init()
         print ("[!] Starting {} on server {}:{} in channel {}".format(self.name, self.server, self.port, self.channel))
-        self.main_loop()
 
-    def main_loop(self):
+    def IRC_init(self):
+        pass
+
+    def main(self):
         self.sock.settimeout(2)
         while (1):
             if self.stopped():

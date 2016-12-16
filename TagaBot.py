@@ -1,12 +1,16 @@
 from __future__ import unicode_literals
 
+from socket import timeout
+
 import IRC_Apero
 import Irc_Class
 import commands
 import message_parsing
+import troll
+from Users_List import USERLIST
 from command_class import *
 from config import config
-from socket import timeout
+
 
 class Bot(Irc_Class.IRC):
     def __init__(self, server, bot_name, channel, port):
@@ -16,13 +20,14 @@ class Bot(Irc_Class.IRC):
         Irc_Class.IRC.__init__(self, server, channel, port, bot_name)
         self.cmds = commands_init(self)
         self.apero = None
+        self.trolls = []
 
     def end(self):
         self.sock.send("QUIT : va faire une revision\r\n")
         self.sock.close()
         exit(0)
 
-    def main_loop(self):
+    def main(self):
         try:
             while (1):
                 if self.stopped():
@@ -35,9 +40,14 @@ class Bot(Irc_Class.IRC):
                         if config.debug:
                             print (line)
                         pseudo, user_account, ip, msg_type, content, target = message_parsing.new_parsing(line)
+                        if self.trolls != []:
+                            if msg_type == "PRIVMSG":
+                                for tr in self.trolls:
+                                    tr.queue.put((pseudo, content))
                         self.update_user_last_seen(pseudo)
                         if not command_loop(pseudo, content, msg_type, self.sock, self.cmds, target):
                             print_message("[" + msg_type + "] USER: " + pseudo + " send: " + content)
+
         except timeout:
             pass
 
@@ -57,6 +67,31 @@ class Bot(Irc_Class.IRC):
             self.apero = IRC_Apero.Apero(self.server, self.channel, self.port, self.name, self.sock)
             self.apero.start()
             print_message("debut de l'apero", msg_type, sock, pseudo, channel)
+
+    def add_troll(self, pseudo, message, msg_type, sock, channel):
+        params = message.split()
+        for i in range(1, len(params)):
+            target = params[i]
+            if target.lower() in {"hackira", "arod", "dazax", "dvor4x", "notfound", "sambecks", "thanat0s"}:
+                print_message("No", msg_type, sock, pseudo, channel)
+            elif USERLIST.user_exist(target):
+                tr = troll.troll(target, sock)
+                self.trolls.append(tr)
+                tr.start()
+                print_message("trolling {} :)".format(target), msg_type, sock, pseudo, channel)
+            else:
+                print_message("I can't troll {}, he don't exit :(".format(target), msg_type, sock, pseudo, channel)
+
+    def remove_troll(self, pseudo, message, msg_type, sock, channel):
+        params = message.split()
+        for i in range(1, len(params)):
+            target = params[i]
+            for tr in self.trolls:
+                if tr.target == target:
+                    tr.stop()
+                    self.trolls.remove(tr)
+
+
 def commands_init(bot):
     cmds = []
     cmd = Command(["!reload", "!reload?"], commands.reload_bot, "RELOAD", args=[("module/all", "require")])
@@ -69,7 +104,7 @@ def commands_init(bot):
     cmd = Command("!list_transfert", commands.list_transferer, "List Tranfert")
     cmds.append(cmd)
     cmd = Command(["!kill_transfert", "!kill_transfert?"], commands.suppress_transferrer, "Kill Tranfert",
-                  args=[("server", "require"), ("#channel", "require"),("public/private/pseudo", "optional")])
+                  args=[("server", "require"), ("#channel", "require"), ("public/private/pseudo", "optional")])
     cmds.append(cmd)
     cmd = Command(["!rpg", "!rpg?"], commands.start_rpg, "Rpg", args=[("server", "optional"), ("channel", "optional")])
     cmds.append(cmd)
@@ -110,5 +145,11 @@ def commands_init(bot):
     cmds.append(cmd)
     cmd = Command(["!kill_spy", "!kill_spy?"], commands.stop_spy, "KILL SPY",
                   args=[("server", "require"), ("#channel", "require")])
+    cmds.append(cmd)
+    cmd = Command(["!troll", "!troll?"], bot.add_troll, "ADD TROLL",
+                  args=[("target", "require/multiple")])
+    cmds.append(cmd)
+    cmd = Command(["!kill_troll", "!kill_troll?"], bot.remove_troll, "KILL TROLL",
+                  args=[("target", "require/multiple")])
     cmds.append(cmd)
     return cmds

@@ -77,7 +77,7 @@ def print_message(message, msg_type="STDIN", sock=None, pseudo=None, channel=Non
 
 
 def send_public_message(message, sock):
-    sock.send("PRIVMSG {} :{}\r\n".format(config.main_channel, message))
+    sock.send("PRIVMSG {} :{}\r\n".format(config.main_channel, message).encode("utf-8"))
 
 
 def send_private_message(message, pseudo, sock):
@@ -129,19 +129,19 @@ def convert_html_to_uni(text):
 
 
 def parse_html_balise(balise, text):
-    assert (isinstance(balise, str) or isinstance(balise, unicode)) and (isinstance(text, str) or isinstance(balise, unicode))
+    assert (isinstance(balise, str) or isinstance(balise, unicode)) and (
+        isinstance(text, str) or isinstance(text, unicode))
 
     if balise.startswith(u"<"):
         balise_name = balise.split()[0][1:]
         balise_end = u"</{}>".format(balise_name)
     else:
         balise_name = balise
-        balise = u"<{}>".format(balise_name)
+        balise = u"<{}".format(balise_name)
         balise_end = u"</{}>".format(balise_name)
-    try:
-        partial = text.split(balise, 1)[1]
-        msg = partial.split(balise_end, 1)[0]
-        return msg
-    except IndexError:
-        print (u"[!] balise {} not found".format(balise))
-        return -1
+
+    start_index = text.index(balise)
+    end_index = text.index(balise_end)
+    part_text = text[start_index:end_index]
+    start_index = part_text.index(">")
+    return part_text[start_index + 1:]

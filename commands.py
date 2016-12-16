@@ -456,7 +456,7 @@ def apero_status(pseudo, message, msg_type, sock, channel):
 def user_list(pseudo, message, msg_type, sock, channel):
     for line in unicode(USERLIST).split("\r\n"):
         print_message(line, msg_type, sock, pseudo, channel)
-        time.sleep(0.5)
+        time.sleep(1)
     return 1
 
 
