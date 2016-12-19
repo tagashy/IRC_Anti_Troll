@@ -24,8 +24,4 @@ def new_parsing(msg):
             content = data[5]
         if target.startswith("#") and msg_type == "PRIVMSG":
             msg_type = "PUBMSG"
-        if config.debug:
-            print_message(
-                "[D] pseudo: '{}' user acount: '{}' ip: '{}' msg type: '{}' content: '{}' target: '{}'".format(
-                    pseudo, user_account, ip, msg_type, content, target))
     return pseudo, user_account, ip, msg_type, content, target

@@ -449,7 +449,7 @@ def apero_status(pseudo, message, msg_type, sock, channel):
     apero = convert_html_to_uni(parse_html_balise(u"<font size=5>", msg))
     print_message(apero, msg_type, sock, pseudo, channel)
     if "font size=3" in msg:
-        conseil = convert_html_to_uni(parse_html_balise(u"<font size=3", msg))
+        conseil = convert_html_to_uni(parse_html_balise(u"<font size=3>", msg))
         print_message(conseil, msg_type, sock, pseudo, channel)
 
 

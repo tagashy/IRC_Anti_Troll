@@ -33,7 +33,9 @@ class Bot(Irc_Class.IRC):
                 if self.stopped():
                     self.end()
                 res = self.sock.recv(1024).decode('utf-8', errors='replace')
-                for line in res.split("\r\n"):
+                lines=res.split("\r\n")
+                print lines
+                for line in lines:
                     if "PING" in line:
                         self.sock.send(line.replace("PING", "PONG") + "\r\n")
                     elif line.strip() != "":
@@ -75,7 +77,7 @@ class Bot(Irc_Class.IRC):
             if target.lower() in {"hackira", "arod", "dazax", "dvor4x", "notfound", "sambecks", "thanat0s"}:
                 print_message("No", msg_type, sock, pseudo, channel)
             elif USERLIST.user_exist(target):
-                tr = troll.troll(target, sock)
+                tr = troll.troll(target, sock,self.channel)
                 self.trolls.append(tr)
                 tr.start()
                 print_message("trolling {} :)".format(target), msg_type, sock, pseudo, channel)

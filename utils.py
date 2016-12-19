@@ -52,8 +52,8 @@ def create_irc_socket(addr, bot_name, channel, port=6667):
 
     while " 366 " not in res:
         res = recv_sock.recv(1024).decode('utf-8', errors='replace')
-        if config.debug:
-            print_message(res)
+        #if config.debug:
+        #    print_message(res)
         if " 353 " in res:
             print_message("[!] creation of user list")
             users += parse_name_list(res, name_list_reg, channel, "{}:{}".format(addr,port))

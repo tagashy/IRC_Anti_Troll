@@ -2,7 +2,9 @@
 from __future__ import unicode_literals
 
 import threading
+
 import readline
+
 import commands
 from command_class import *
 from config import config
@@ -36,14 +38,10 @@ class StdInput(threading.Thread):
                 print_message("[S] COMMAND SUCESS")
             else:
                 try:
-                    exec data
-                    print_message("[S] EXEC SUCCES")
+                    self.sock.send(data + "\n")
+                    print ("[S] SEND SUCCES")
                 except:
-                    try:
-                        self.sock.send(data + "\n")
-                        print ("[S] SEND SUCCES")
-                    except:
-                        print ("[F] COMMAND/EXEC/SEND FAIL")
+                    print ("[F] COMMAND/EXEC/SEND FAIL")
 
     def stop(self):
         self._stop.set()
